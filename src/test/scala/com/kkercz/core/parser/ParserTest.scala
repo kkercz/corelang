@@ -1,9 +1,8 @@
-package com.kkercz.core
+package com.kkercz.core.parser
 
 import com.kkercz.core.ast.Types.CoreProgram
 import com.kkercz.core.ast.{EAp, ENum, EVar}
-import com.kkercz.core.parser.Parser
-import org.scalatest._
+import org.scalatest.{FlatSpec, Matchers}
 
 class ParserTest extends FlatSpec with Matchers {
 

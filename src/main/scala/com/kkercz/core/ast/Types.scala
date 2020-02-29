@@ -9,7 +9,7 @@ case object Types {
   type Name = String
   type CoreExpr = Expr[Name]
 
-  type Alter[T] = List[(Int, List[T], Expr[T])]
+  type Alter[T] = (Int, List[T], Expr[T])
   type CoreAlter = Alter[Name]
 
   type IsRecursive = Boolean
