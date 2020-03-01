@@ -1,26 +1,41 @@
 package com.kkercz.core.ast
 
-import com.kkercz.core.ast.Types.{Alter, IsRecursive, Name}
-
 sealed trait Expr[+T]
 
-case class EVar[T](name: Name) extends Expr[T]
+object Expr {
 
-case class ENum[T](value: Int) extends Expr[T]
+  case class Var[T](name: Name) extends Expr[T]
 
-case class EConstr[T](tag: Int, arity: Int) extends Expr[T]
+  case class Num[T](value: Int) extends Expr[T]
 
-case class EAp[T](lhs: Expr[T], rhs: Expr[T]) extends Expr[T]
+  case class Constr[T](tag: Int, arity: Int) extends Expr[T]
 
-case class ELet[T](
-                    isRec: IsRecursive,
-                    definitions: List[(T, Expr[T])],
-                    body: Expr[T]
-                  ) extends Expr[T]
+  case class Ap[T](lhs: Expr[T], rhs: Expr[T]) extends Expr[T]
 
-case class ECase[T](
-                     expr: Expr[T],
-                     alternatives: List[Alter[T]]
+  case class Let[T](
+                     isRec: Boolean,
+                     definitions: List[(T, Expr[T])],
+                     body: Expr[T]
                    ) extends Expr[T]
 
-case class ELam[T](variables: List[T], body: Expr[T]) extends Expr[T]
+  case class Case[T](
+                      expr: Expr[T],
+                      alternatives: List[Alter[T]]
+                    ) extends Expr[T]
+
+  case class Lambda[T](variables: List[T], body: Expr[T]) extends Expr[T]
+
+  // Utility Functions
+
+  def bindersOf[T](definitions: List[(T, Expr[T])]): List[T] = definitions.map(d => d._1)
+
+  def rhssOf[T](definitions: List[(T, Expr[T])]): List[Expr[T]] = definitions.map(d => d._2)
+
+  def isAtomic[T](expr: Expr[T]): Boolean = expr match {
+    case Var(name) => true
+    case Num(value) => true
+    case _ => false
+  }
+
+}
+

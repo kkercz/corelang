@@ -1,7 +1,7 @@
 package com.kkercz.core.parser
 
-import com.kkercz.core.ast.Types.CoreProgram
-import com.kkercz.core.ast.{EAp, ENum, EVar}
+import com.kkercz.core.ast.CoreProgram
+import com.kkercz.core.ast.Expr.{Ap, Num, Var}
 import org.scalatest.{FlatSpec, Matchers}
 
 class ParserTest extends FlatSpec with Matchers {
@@ -14,8 +14,8 @@ class ParserTest extends FlatSpec with Matchers {
         |""".stripMargin
 
     val expectedResult: CoreProgram = List(
-      ("main", List(), EAp(EVar("double"), ENum(21))),
-      ("double", List("x"), EAp(EAp(EVar("+"), EVar("x")), EVar("x")))
+      ("main", List(), Ap(Var("double"), Num(21))),
+      ("double", List("x"), Ap(Ap(Var("+"), Var("x")), Var("x")))
     )
 
     Parser.parse(input) should be(expectedResult)

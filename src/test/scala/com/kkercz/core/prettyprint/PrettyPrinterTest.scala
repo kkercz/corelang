@@ -1,18 +1,18 @@
 package com.kkercz.core.prettyprint
 
-import com.kkercz.core.ast.Types.{CoreProgram, nonRecursive}
-import com.kkercz.core.ast.{EAp, ELet, ENum, EVar}
+import com.kkercz.core.ast.CoreProgram
+import com.kkercz.core.ast.Expr.{Ap, Let, Num, Var}
 import org.scalatest._
 
 class PrettyPrinterTest extends FlatSpec with Matchers {
 
   "Pretty printer" should "pretty print a simple program with the let clause" in {
     val input: CoreProgram = List(
-      ("main", List(), EAp(EVar("quadruple"), ENum(10))),
-      ("quadruple", List("x"), ELet(
-        nonRecursive,
-        List(("twice_x", EAp(EAp(EVar("+"), EVar("x")), EVar("x")))),
-        EAp(EAp(EVar("+"), EVar("twice_x")), EVar("twice_x"))))
+      ("main", List(), Ap(Var("quadruple"), Num(10))),
+      ("quadruple", List("x"), Let(
+        isRec = false,
+        List(("twice_x", Ap(Ap(Var("+"), Var("x")), Var("x")))),
+        Ap(Ap(Var("+"), Var("twice_x")), Var("twice_x"))))
     )
 
     val expected: String =
@@ -22,6 +22,6 @@ class PrettyPrinterTest extends FlatSpec with Matchers {
         |              in twice_x + twice_x
         |""".stripMargin.trim
 
-    CorePrettyPrinter.prettyPrint(input) should be(expected)
+    PrettyPrinter.prettyPrint(input) should be(expected)
   }
 }
