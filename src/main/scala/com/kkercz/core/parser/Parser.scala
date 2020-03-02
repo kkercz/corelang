@@ -7,9 +7,11 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 case object Parser extends JavaTokenParsers {
 
+  val keywords = Set("let", "letrec", "case", "in", "of", "Pack")
+
   def parse(program: String) = super.parseAll(pExpr, program)
 
-  def pExpr: Parser[CoreExpr] = pNum | pCase | pVar | pInfixOpApplication
+  def pExpr: Parser[CoreExpr] = pNum | pVar | pCase | pInfixOpApplication
 
   def pCase: Parser[Case[Name]] = "case" ~ pExpr ~ "of" ~ pAlts ^^ { case _ ~ expr ~ _ ~ alts => Case(expr, alts) }
 
@@ -24,7 +26,7 @@ case object Parser extends JavaTokenParsers {
 
   def pNum: Parser[Expr.Num[Name]] = wholeNumber ^^ { str => Num(str.toInt) }
 
-  def pVar: Parser[Expr.Var[Name]] = ident ^^ { str => Var(str) }
+  def pVar: Parser[Expr.Var[Name]] = ident.withFilter(!keywords.contains(_)) ^^ { str => Var(str) }
 
   def oneOrMoreWithSep[T](p: Parser[T], sep: String): Parser[List[T]] =
     p ~ sep  ~ oneOrMoreWithSep(p, sep) ^^ { case head ~ _ ~ tail => head :: tail} | p ^^ {List(_)}
