@@ -4,6 +4,9 @@ sealed trait Expr[+T]
 
 object Expr {
 
+  val keywords = Set("let", "letrec", "case", "in", "of", "Pack")
+  val operators = Set("|", "&", "<", "<=", "==", "~=", ">=", ">", "+", "-", "*", "/")
+
   case class Var[T](name: Name) extends Expr[T]
 
   case class Num[T](value: Int) extends Expr[T]

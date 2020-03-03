@@ -1,7 +1,7 @@
 package com.kkercz.core.prettyprint
 
 import com.kkercz.core.ast.Expr._
-import com.kkercz.core.ast.{CoreExpr, CoreProgram, Name}
+import com.kkercz.core.ast.{CoreExpr, CoreProgram, Expr, Name}
 import com.kkercz.core.util.PrintableText
 import com.kkercz.core.util.PrintableText._
 
@@ -17,7 +17,7 @@ case object PrettyPrinter {
     case Var(name) => name
     case Num(value) => value.toString
     case Constr(tag, arity) => s"Pack{$tag, $arity}"
-    case Ap(Ap(Var("+"), a), b) => ppr(a) ++ " + " ++ ppr(b)
+    case Ap(Ap(Var(op), a), b) if Expr.operators.contains(op)  => ppr(a) ++ s" $op " ++ ppr(b)
     case Ap(lhs, rhs) => ppr(lhs) ++ " " ++ ppr(rhs)
     case Let(isRec, definitions, body) =>
       val keyword = if (isRec) "letrec" else "let"
