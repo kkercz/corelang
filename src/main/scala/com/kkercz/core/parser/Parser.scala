@@ -7,7 +7,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 
 case object Parser extends JavaTokenParsers {
 
-  def parse(program: String) = super.parseAll(pProgram, program) match {
+  def parse(program: String): CoreProgram = super.parseAll(pProgram, program) match {
     case Success(result, _) => result
     case Error(msg, _) => throw new IllegalArgumentException(msg)
   }
@@ -35,12 +35,19 @@ case object Parser extends JavaTokenParsers {
   def pAlt: Parser[Alter[Name]] = ("<" ~> wholeNumber <~ ">") ~ pVar.* ~ ("->" ~> pExpr) ^^
     { case num ~ vars ~ expr => (num.toInt, vars map { _.name }, expr) }
 
-  def pExpr1: Parser[CoreExpr] = pExpr2 ~ "|" ~ pExpr1 ^^ appBinary | pExpr2
-  def pExpr2: Parser[CoreExpr] = pExpr3 ~ "&" ~ pExpr2 ^^ appBinary | pExpr3
-  def pExpr3: Parser[CoreExpr] = pExpr4 ~ ("<" | "<=" | "==" | "~=" | ">=" | ">") ~ pExpr3 ^^ appBinary | pExpr4
-  def pExpr4: Parser[CoreExpr] = pExpr5 ~ "+" ~ pExpr4 ^^ appBinary | pExpr5 ~ "-" ~ pExpr5 ^^ appBinary | pExpr5
-  def pExpr5: Parser[CoreExpr] = pExpr6 ~ "*" ~ pExpr5 ^^ appBinary | pExpr6 ~ "/" ~ pExpr6 ^^ appBinary | pExpr6
-  def pExpr6: Parser[CoreExpr] = pAtomic.+ ^^ mkAp
+  type PartialExpr = Option[(String, CoreExpr)]
+
+  def pExpr1: Parser[CoreExpr] = pExpr2 ~ pExpr1c ^^ assembleOp
+  def pExpr1c: Parser[PartialExpr] = "|" ~ pExpr1 ^^ foundOp | notFound
+  def pExpr2: Parser[CoreExpr] = pExpr3 ~ pExpr2c ^^ assembleOp
+  def pExpr2c: Parser[PartialExpr] = "&" ~ pExpr2 ^^ foundOp | notFound
+  def pExpr3: Parser[CoreExpr] = pExpr4 ~ pExpr3c ^^ assembleOp
+  def pExpr3c: Parser[PartialExpr] = ("<" | "<=" | "==" | "~=" | ">=" | ">") ~ pExpr4 ^^ foundOp | notFound
+  def pExpr4: Parser[CoreExpr] = pExpr5 ~ pExpr4c ^^ assembleOp
+  def pExpr4c: Parser[PartialExpr] = "+" ~ pExpr4 ^^ foundOp |  "-" ~ pExpr5 ^^ foundOp | notFound
+  def pExpr5: Parser[CoreExpr] = pExpr6 ~ pExpr5c ^^ assembleOp
+  def pExpr5c: Parser[PartialExpr] = "*" ~ pExpr5 ^^ foundOp |  "/" ~ pExpr6 ^^ foundOp | notFound
+  def pExpr6: Parser[CoreExpr] = pAtomic.+ ^^ {_ reduceLeft ((l, r) => Expr.Ap(l, r))}
 
   def pPack: Parser[Expr.Constr[Name]] = "Pack{" ~> (wholeNumber ~ wholeNumber) <~ "}" ^^ { case n1 ~ n2 => Expr.Constr(n1.toInt, n2.toInt)}
 
@@ -51,6 +58,10 @@ case object Parser extends JavaTokenParsers {
   def oneOrMoreWithSep[T](p: Parser[T], sep: String): Parser[List[T]] =
     p ~ sep  ~ oneOrMoreWithSep(p, sep) ^^ { case head ~ _ ~ tail => head :: tail} | p ^^ {List(_)}
 
-  def mkAp(value: List[CoreExpr]): CoreExpr = value reduceLeft ((l, r) => Expr.Ap(l, r))
-  def appBinary(v: ~[~[CoreExpr, String], CoreExpr]):CoreExpr = Ap(Ap(Var(v._1._2), v._1._1), v._2)
+  def assembleOp(v: ~[CoreExpr, PartialExpr]):CoreExpr = v._2 match {
+    case Some((op, rhs)) => Ap(Ap(Var(op), v._1), rhs)
+    case None =>v._1
+  }
+  def foundOp(v: ~[String, CoreExpr]):Option[(String, CoreExpr)] = Option(v._1, v._2)
+  def notFound:Parser[Option[(String, CoreExpr)]] = "" ^^ { _ => None }
 }

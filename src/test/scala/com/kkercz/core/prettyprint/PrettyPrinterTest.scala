@@ -17,7 +17,7 @@ class PrettyPrinterTest extends FlatSpec with Matchers {
 
     val expected: String =
       """
-        |main = quadruple 10
+        |main = quadruple 10 ;
         |quadruple x = let twice_x = x + x
         |              in twice_x + twice_x
         |""".stripMargin.trim

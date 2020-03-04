@@ -1,6 +1,15 @@
 package com.kkercz.core.ast
 
-sealed trait Expr[+T]
+import com.kkercz.core.ast.Expr.{Constr, Num, Var}
+
+sealed trait Expr[+T] {
+  def isAtomic: Boolean = this match {
+    case Var(_)       => true
+    case Num(_)       => true
+    case Constr(_, _) => true
+    case _            => false
+  }
+}
 
 object Expr {
 
@@ -34,11 +43,7 @@ object Expr {
 
   def rhssOf[T](definitions: List[(T, Expr[T])]): List[Expr[T]] = definitions.map(d => d._2)
 
-  def isAtomic[T](expr: Expr[T]): Boolean = expr match {
-    case Var(name) => true
-    case Num(value) => true
-    case _ => false
-  }
+
 
 }
 
