@@ -10,7 +10,7 @@ trait Heap[T] {
 
   def addresses(): Set[Address]
 
-  def lookup(address: Address): Option[T]
+  def lookup(address: Address): T
 }
 
 private case class HeapImpl[T](map: Map[Address, T]) extends Heap[T] {
@@ -25,7 +25,7 @@ private case class HeapImpl[T](map: Map[Address, T]) extends Heap[T] {
 
   override def addresses(): Set[Address] = map.keys.toSet
 
-  override def lookup(address: Address): Option[T] = map.get(address)
+  override def lookup(address: Address): T = map.getOrElse(address, throw new IllegalStateException(s"Address $address is not allocated"))
 }
 
 object Heap {

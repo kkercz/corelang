@@ -3,24 +3,30 @@ package com.kkercz.core.interpreter.data
 import com.kkercz.core.ast.{CoreExpr, Name}
 import com.kkercz.core.prettyprint.PrettyPrinter
 
-trait Node {}
+sealed trait Node {
+  final def isData: Boolean = this match {
+    case Node.Num(_) => true
+    case Node.App(_, _) => false
+    case Node.SC(_, _, _) => false
+  }
+}
 
 object Node {
 
   case class App(a1: Address, a2: Address) extends Node {
-    override def toString: Name = s"a_$a1 a_$a2"
+    override def toString: Name = s"Node.App(a_$a1 a_$a2)"
   }
 
   case class SC(name: Name, bindings: List[Name], body: CoreExpr) extends Node {
     override def toString: Name = {
       val bindingsString = bindings.mkString(" ")
       val bodyString = PrettyPrinter.prettyPrint(body)
-      s"$name $bindingsString = $bodyString"
+      s"Node.SC($name $bindingsString = $bodyString)"
     }
   }
 
   case class Num(value: Int) extends Node {
-    override def toString: Name = value.toString
+    override def toString: Name = s"Node.Num(value.toString)"
   }
 
 }
