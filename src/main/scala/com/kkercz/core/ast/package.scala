@@ -1,16 +1,17 @@
 package com.kkercz.core
 
+import com.kkercz.core.ast.Expr.Alter
+
 package object ast {
 
-  type Program[T] = List[ScDefn[T]]
+  case class Supercombinator[T](name: Name, vars: List[T], body: Expr[T])
+
+  type Program[T] = List[Supercombinator[T]]
   type CoreProgram = Program[Name]
-  type ScDefn[T] = (Name, List[T], Expr[T])
-  type CoreScDefn = ScDefn[Name]
+  type CoreSc = Supercombinator[Name]
 
   type Name = String
+
   type CoreExpr = Expr[Name]
-
-  type Alter[T] = (Int, List[T], Expr[T])
   type CoreAlter = Alter[Name]
-
 }

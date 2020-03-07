@@ -1,20 +1,20 @@
 package com.kkercz.core.parser
 
-import com.kkercz.core.ast.Expr.{Ap, Case, Num, Var}
+import com.kkercz.core.ast.Expr._
 import com.kkercz.core.ast._
 
 import scala.util.parsing.combinator.JavaTokenParsers
 
 case object Parser extends JavaTokenParsers {
 
-  def parse(program: String): CoreProgram = super.parseAll(pProgram, program) match {
+  def parseCoreProgram(program: String): CoreProgram = super.parseAll(pProgram, program) match {
     case Success(result, _) => result
-    case Error(msg, _) => throw new IllegalArgumentException(msg)
+    case NoSuccess(msg, _) => throw new IllegalArgumentException(msg)
   }
 
   def pProgram: Parser[CoreProgram] = oneOrMoreWithSep(pSc, ";")
 
-  def pSc:Parser[ScDefn[Name]] = (pVar ~ pVar.* <~ "=") ~ pExpr ^^ { case name ~ vars ~ body => (name.name, vars map (_.name), body)}
+  def pSc:Parser[Supercombinator[Name]] = (pVar ~ pVar.* <~ "=") ~ pExpr ^^ { case name ~ vars ~ body => Supercombinator(name.name, vars map (_.name), body)}
 
   def pExpr: Parser[CoreExpr] =  pLet | pCase | pLambda | pExpr1
 
@@ -33,7 +33,7 @@ case object Parser extends JavaTokenParsers {
   def pAlts: Parser[List[Alter[Name]]] = oneOrMoreWithSep(pAlt, ";")
 
   def pAlt: Parser[Alter[Name]] = ("<" ~> wholeNumber <~ ">") ~ pVar.* ~ ("->" ~> pExpr) ^^
-    { case num ~ vars ~ expr => (num.toInt, vars map { _.name }, expr) }
+    { case num ~ vars ~ expr => Alter(num.toInt, vars map { _.name }, expr) }
 
   type PartialExpr = Option[(String, CoreExpr)]
 

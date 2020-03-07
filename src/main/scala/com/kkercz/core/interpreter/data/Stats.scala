@@ -1,4 +1,4 @@
-package com.kkercz.core.interpreter.ti
+package com.kkercz.core.interpreter.data
 
 case class Stats(steps: Int) {
 

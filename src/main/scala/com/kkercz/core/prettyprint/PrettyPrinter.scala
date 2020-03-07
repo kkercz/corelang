@@ -1,7 +1,7 @@
 package com.kkercz.core.prettyprint
 
 import com.kkercz.core.ast.Expr._
-import com.kkercz.core.ast.{CoreExpr, CoreProgram, Expr, Name}
+import com.kkercz.core.ast._
 import com.kkercz.core.util.PrintableText
 import com.kkercz.core.util.PrintableText._
 
@@ -9,7 +9,9 @@ case object PrettyPrinter {
 
   def prettyPrint(program: CoreProgram): String = ppr(program).printOut()
 
-  def ppr(program: CoreProgram): PrintableText = interleave(" ;" ++ Newline, program map { case (name, vars, value) =>
+  def prettyPrint(expr: CoreExpr): String = ppr(expr).printOut()
+
+  def ppr(program: CoreProgram): PrintableText = interleave(" ;" ++ Newline, program map { case Supercombinator(name, vars, value) =>
     name ++ joinWithSpacePrefix(vars) ++ " = " ++ Indented(ppr(value))
   })
 
@@ -27,7 +29,7 @@ case object PrettyPrinter {
       )
     case Case(expr, alternatives) => concat(
       "case ", pprAtomic(expr), " of", Newline,
-      "       ", Indented(interleave(" ;" ++ Newline, alternatives map { case (tag, bindings, expr) =>
+      "       ", Indented(interleave(" ;" ++ Newline, alternatives map { case Alter(tag, bindings, expr) =>
         "<" ++ tag.toString ++ ">" ++ joinWithSpacePrefix(bindings) ++ " -> " ++ Indented(ppr(expr))
       })))
     case Lambda(variables, body) => "\\" ++ variables.mkString(" ") ++ ". " + Indented(ppr(body))

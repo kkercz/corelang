@@ -1,7 +1,7 @@
 package com.kkercz.core.parser
 
-import com.kkercz.core.ast.CoreProgram
 import com.kkercz.core.ast.Expr.{Ap, Num, Var}
+import com.kkercz.core.ast.{CoreProgram, Supercombinator}
 import com.kkercz.core.prettyprint.PrettyPrinter
 import com.kkercz.core.util.Examples
 import org.scalatest.{FlatSpec, Matchers}
@@ -16,11 +16,11 @@ class ParserTest extends FlatSpec with Matchers {
         |""".stripMargin
 
     val expectedResult: CoreProgram = List(
-      ("main", List(), Ap(Var("double"), Num(21))),
-      ("double", List("x"), Ap(Ap(Var("+"), Var("x")), Var("x")))
+      Supercombinator("main", List(), Ap(Var("double"), Num(21))),
+      Supercombinator("double", List("x"), Ap(Ap(Var("+"), Var("x")), Var("x")))
     )
 
-    Parser.parse(input) should be(expectedResult)
+    Parser.parseCoreProgram(input) should be(expectedResult)
   }
 
   "Parser" should "parse the sieve of Eratosthenes" in {
@@ -40,6 +40,6 @@ class ParserTest extends FlatSpec with Matchers {
         |                   <1> -> nil ;
         |                   <2> p ps -> cons p (take (n -1) ps))""".stripMargin
 
-    PrettyPrinter.prettyPrint(Parser.parse(Examples.sieve)) should be (expectedResult)
+    PrettyPrinter.prettyPrint(Parser.parseCoreProgram(Examples.sieve)) should be (expectedResult)
   }
 }

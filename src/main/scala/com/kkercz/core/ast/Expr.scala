@@ -35,6 +35,8 @@ object Expr {
                       alternatives: List[Alter[T]]
                     ) extends Expr[T]
 
+  case class Alter[T](tag: Int, args: List[T], body: Expr[T])
+
   case class Lambda[T](variables: List[T], body: Expr[T]) extends Expr[T]
 
   // Utility Functions

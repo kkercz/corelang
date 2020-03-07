@@ -1,4 +1,6 @@
-package com.kkercz.core.interpreter.ti
+package com.kkercz.core.interpreter.data
+
+import com.kkercz.core.interpreter.data
 
 case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats: Stats) {
   def withStack(stack: Stack): State = State(stack, heap, dump, globals, stats);
@@ -10,5 +12,5 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
 }
 
 object State {
-  def empty(): State = State(List(), Heap(), List(), Map(), Stats())
+  def empty(): State = data.State(List(), Heap(), List(), Map(), Stats())
 }

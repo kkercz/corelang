@@ -1,4 +1,4 @@
-package com.kkercz.core.interpreter.ti
+package com.kkercz.core.interpreter.data
 
 trait Heap[T] {
 
