@@ -26,7 +26,7 @@ object Node {
   }
 
   case class Num(value: Int) extends Node {
-    override def toString: Name = s"Node.Num(value.toString)"
+    override def toString: Name = s"Node.Num($value)"
   }
 
 }
