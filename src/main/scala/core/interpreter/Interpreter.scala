@@ -1,11 +1,23 @@
 package core.interpreter
 
-import core.interpreter.ti.TiInterpreterMark1
+import core.interpreter.data.{Node, State}
+import core.interpreter.ti.GraphReducer.eval
+import core.interpreter.ti.InitialStateCompiler.compile
+import core.parser.Parser.parseCoreProgram
 
-trait Interpreter {
-  def run(program: String): String
+case object Interpreter {
+
+  private def runTemplateInstantiation(program: String): List[State] = eval(compile(parseCoreProgram(program)))
+
+  def compute(program: String): String =
+    showResult(runTemplateInstantiation(program))
+
+  private def showResult(states: List[State]): String = {
+    val finalState = states.last
+    finalState.heap.lookup(finalState.stack.head) match {
+      case Node.Num(value) => value.toString
+      case node => node.toString
+    }
+  }
 }
 
-object Interpreter {
-  def apply(): Interpreter = (program: String) => TiInterpreterMark1.run(program)
-}
