@@ -56,23 +56,27 @@ case object TiInterpreterMark1 extends Interpreter {
       state.heap.lookup(addr) match {
         case Node.Num(_)      => throw new IllegalArgumentException("Number is not a function!")
         case Node.App(a1, _) => state.withStack(a1 :: addr :: tail)
-        case Node.SC(name, bindings, body) =>
-          val (args, rest) = tail splitAt bindings.length
-          if (args.length != bindings.length)
-            throw new IllegalArgumentException("Too few arguments provided to function " + name)
-
-          val env = Map(bindings zip argAddresses(args, state.heap):_* ) ++ state.globals
+        case Node.SC(name, arguments, body) =>
+          val (args, rest) = tail splitAt arguments.length
+          val env = argBindings(name, arguments, args, state.heap) ++ state.globals
           val (newHeap, newAddress) = instantiate(state.heap, env, body)
-          val newState = state.withStack(newAddress :: rest).withHeap(newHeap)
-          newState
+
+          state.withStack(newAddress :: rest).withHeap(newHeap)
       }
     case Nil => throw new IllegalStateException("Stack should never be null")
   }
 
-  def argAddresses(stack: Stack, heap: TiHeap): List[Address] = stack.map( addr => heap.lookup(addr) match {
+  def argBindings(fun: Name, argNames: List[Name], stack: Stack, heap: TiHeap): Map[Name, Address] = {
+    if (argNames.length != stack.length)
+      throw new IllegalArgumentException("Too few arguments provided to function " + fun)
+
+    val addresses: List[Address] = stack.map(addr => heap.lookup(addr) match {
       case Node.App(_, arg) => arg
       case _ => throw new IllegalStateException("Expected to see function application here")
     })
+
+    Map( argNames zip addresses :_* )
+  }
 
   def instantiate(heap: TiHeap, env: Map[Name, Address], body: CoreExpr): (TiHeap, Address) =
     body match {
