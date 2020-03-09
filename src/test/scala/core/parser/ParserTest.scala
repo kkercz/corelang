@@ -2,7 +2,7 @@ package core.parser
 
 import core.ast.Expr.{Ap, Num, Var}
 import core.ast.{CoreProgram, Supercombinator}
-import core.prettyprint.PrettyPrinter
+import core.prettyprint.ProgramPrettyPrinter
 import core.util.Examples
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -40,6 +40,6 @@ class ParserTest extends FlatSpec with Matchers {
         |                   <1> -> nil ;
         |                   <2> p ps -> cons p (take (n -1) ps))""".stripMargin
 
-    PrettyPrinter.prettyPrint(Parser.parseCoreProgram(Examples.sieve)) should be (expectedResult)
+    ProgramPrettyPrinter.prettyPrint(Parser.parseCoreProgram(Examples.sieve)) should be (expectedResult)
   }
 }

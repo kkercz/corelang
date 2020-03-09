@@ -5,7 +5,7 @@ import core.ast._
 import core.util.PrintableText
 import core.util.PrintableText._
 
-case object PrettyPrinter {
+case object ProgramPrettyPrinter {
 
   def prettyPrint(program: CoreProgram): String = ppr(program).printOut()
 

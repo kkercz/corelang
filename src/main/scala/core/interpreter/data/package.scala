@@ -11,10 +11,10 @@ package object data {
   type TiHeap = Heap[Node]
   type Globals = Map[Name, Address]
 
-  class UnsafeMap[K,V](map: Map[K, V]) {
+  class InterpreterMap[K,V](map: Map[K, V]) {
     def getOrThrow(key: K): V = map.getOrElse(key, throw new IllegalStateException("Unrecognized symbol: " + key))
   }
 
-  implicit def mapToRichMap[K, V](map: Map[K, V]): UnsafeMap[K, V] = new UnsafeMap[K, V](map)
+  implicit def toInterpreterMap[K, V](map: Map[K, V]): InterpreterMap[K, V] = new InterpreterMap[K, V](map)
 
 }

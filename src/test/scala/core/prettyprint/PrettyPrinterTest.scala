@@ -22,6 +22,6 @@ class PrettyPrinterTest extends FlatSpec with Matchers {
         |              in twice_x + twice_x
         |""".stripMargin.trim
 
-    PrettyPrinter.prettyPrint(input) should be(expected)
+    ProgramPrettyPrinter.prettyPrint(input) should be(expected)
   }
 }

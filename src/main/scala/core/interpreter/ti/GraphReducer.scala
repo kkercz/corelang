@@ -28,9 +28,9 @@ case object GraphReducer {
           val env = argBindings(name, arguments, args, state.heap) ++ state.globals
           val (newHeap, newAddress) = instantiate(state.heap, env, body)
 
-          state.withStack(newAddress :: rest).withHeap(newHeap)
+          state.withHeap(newHeap).withStack(newAddress :: rest)
       }
-    case Nil => throw new IllegalStateException("Stack should never be null")
+    case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
 
   private def argBindings(fun: Name, argNames: List[Name], stack: Stack, heap: TiHeap): Map[Name, Address] = {

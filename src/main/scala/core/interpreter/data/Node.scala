@@ -1,7 +1,7 @@
 package core.interpreter.data
 
 import core.ast.{CoreExpr, Name}
-import core.prettyprint.PrettyPrinter
+import core.prettyprint.ProgramPrettyPrinter
 
 sealed trait Node {
   final def isData: Boolean = this match {
@@ -20,7 +20,7 @@ object Node {
   case class SC(name: Name, bindings: List[Name], body: CoreExpr) extends Node {
     override def toString: Name = {
       val bindingsString = bindings.mkString(" ")
-      val bodyString = PrettyPrinter.prettyPrint(body)
+      val bodyString = ProgramPrettyPrinter.prettyPrint(body)
       s"Node.SC($name $bindingsString = $bodyString)"
     }
   }

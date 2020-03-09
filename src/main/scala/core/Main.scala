@@ -1,11 +1,7 @@
 package core
 
-import core.parser.Parser
-import core.prettyprint.PrettyPrinter
-import core.util.Examples
+import core.interpreter.Interpreter
 
 case object Main {
-  def main(args: Array[String]): Unit = Examples.examplePrograms.foreach(p => { show(p); println(); println()})
-
-  def show(program: String): Unit = println(PrettyPrinter.prettyPrint(Parser.parseCoreProgram(program)))
+  def main(args: Array[String]): Unit = println(Interpreter.explain("main = S K K 3"))
 }
