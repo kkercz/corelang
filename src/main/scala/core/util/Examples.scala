@@ -46,8 +46,21 @@ case object Examples {
       |
       |""".stripMargin
 
+  val letrec: String =
+    """
+      |pair x y f = f x y ;
+      |fst p = p K ;
+      |snd p = p K1 ;
+      |f x y = letrec
+      |           a = pair x b ;
+      |           b = pair y a
+      |        in fst (snd (snd (snd a))) ;
+      |main = f 3 4
+      |""".stripMargin
+
+
   val examplePrograms = Seq(
-    basic1, basic2, basic3, let1, let2, let3, sieve
+    basic1, basic2, basic3, let1, let2, let3, sieve, letrec
   )
 
 

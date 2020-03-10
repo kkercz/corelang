@@ -5,6 +5,8 @@ import core.interpreter.data._
 
 case object GraphReducer {
 
+  type Env = Map[Name, Address]
+
   def eval(state: State): List[State] = {
     if (isFinal(state)) {
       List(state)
@@ -45,7 +47,7 @@ case object GraphReducer {
     Map( argNames zip addresses :_* )
   }
 
-  private def instantiate(heap: TiHeap, env: Map[Name, Address], body: CoreExpr): (TiHeap, Address) =
+  private def instantiate(heap: TiHeap, env: Env, body: CoreExpr): (TiHeap, Address) =
     body match {
       case Expr.Num(value)                    => heap.alloc(Node.Num(value))
       case Expr.Var(name)                     => (heap, env.getOrThrow(name))
@@ -53,8 +55,16 @@ case object GraphReducer {
         val (heap1, addr1) = instantiate(heap, env, lhs)
         val (heap2, addr2) = instantiate(heap1, env, rhs)
         heap2.alloc(Node.App(addr1, addr2))
+      case Expr.Let(isRec, definitions, body) =>
+        def instDef(heapEnv: (TiHeap, Env), defn: (Name, CoreExpr)): (TiHeap, Env) = {
+          val (heap, env) = heapEnv
+          val (name, value) = defn
+          val (newHeap, addr) = instantiate(heap, env, value)
+          (newHeap, env.updated(name, addr))
+        }
+        val (newHeap, newEnv): (TiHeap, Env) = definitions.foldLeft (heap, env) (instDef)
+        instantiate(newHeap, newEnv, body)
       case Expr.Constr(tag, arity)            => ???
-      case Expr.Let(isRec, definitions, body) => ???
       case Expr.Case(expr, alternatives)      => ???
       case Expr.Lambda(variables, body)       => ???
     }
