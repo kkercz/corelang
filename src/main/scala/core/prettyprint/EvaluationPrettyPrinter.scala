@@ -10,7 +10,7 @@ case object EvaluationPrettyPrinter {
     val statesWithPrevious: List[(Option[State], State)] = (None, states.head) :: (states map { Some(_) } zip states.drop(1))
     interleave(
       Newline ++ Newline,
-      statesWithPrevious map { case (previous, state) => printState(previous, state)}
+      statesWithPrevious map { case (previous, state) => printState(previous, state) }
     )
   }
 
@@ -28,13 +28,21 @@ case object EvaluationPrettyPrinter {
     )
   }
 
-  private def allAddressesInUse(stack: Stack, heap: TiHeap): List[Address] = stack match {
-    case head :: tail => heap.lookup(head) match {
-        case Node.App(a1, a2) => (a1 :: a2 :: allAddressesInUse(a1 :: a2 :: tail, heap)).distinct
-        case _ => allAddressesInUse(tail, heap).distinct
+  private def allAddressesInUse(stack: Stack, heap: TiHeap): List[Address] = {
+    def allAddressesInUse(stack: Stack, heap: TiHeap, seen: Set[Address]): List[Address] = {
+      stack match {
+        case head :: tail if !seen.contains(head) =>
+          heap.lookup(head) match {
+            case Node.App(a1, a2) => a1 :: a2 :: allAddressesInUse(a1 :: a2 :: tail, heap, seen.incl(head))
+            case Node.Ref(a) => a :: allAddressesInUse(a :: tail, heap, seen.incl(head))
+            case _ => allAddressesInUse(tail, heap, seen)
+          }
+        case _ :: tail => allAddressesInUse(tail, heap, seen)
+        case Nil => List()
+      }
     }
-    case Nil => List()
-  }
+    allAddressesInUse(stack, heap, Set())
+}
 
   private def printHeapEntries(heap: TiHeap, addresses: List[Address], name: String): PrintableText = {
     if (addresses.nonEmpty) concat(
@@ -56,7 +64,7 @@ case object EvaluationPrettyPrinter {
       case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.prettyPrint(body))
       case Node.Num(value) => s"$value"
     }
-    Str(f"[$address%2d]: ") ++ heapValue
+    Str(f"[$address%2d]: ") ++ Indented(heapValue)
   }
 
 

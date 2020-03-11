@@ -24,7 +24,8 @@ case object ProgramPrettyPrinter {
     case Let(isRec, definitions, body) =>
       val keyword = if (isRec) "letrec" else "let"
       concat(
-        keyword, " ", Indented(pprDefs(definitions)), Newline,
+        keyword, Newline,
+        "       ", Indented(pprDefs(definitions)), Newline,
         "in ", Indented(ppr(body))
       )
     case Case(expr, alternatives) => concat(

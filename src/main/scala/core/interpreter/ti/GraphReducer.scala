@@ -11,8 +11,12 @@ case object GraphReducer {
     if (isFinal(state)) {
       List(state)
     } else {
-      state :: eval(next(state).withStats(state.stats.incrSteps()))
+      state :: eval(prepare(state, next(state)))
     }
+  }
+
+  def prepare(previousState: State, state: State): State = {
+    state.withStats(state.stats.incrSteps())
   }
 
   private def isFinal(state: State): Boolean = state.stack match {
@@ -23,11 +27,12 @@ case object GraphReducer {
   private def next(state: State): State = state.stack match {
     case addr :: tail =>
       state.heap.lookup(addr) match {
-        case Node.Num(_)      => throw new IllegalArgumentException("Number is not a function!")
+        case Node.Ref(a) => state.withStack(a :: tail)
+        case Node.Num(_) => throw new IllegalArgumentException("Number is not a function!")
         case Node.App(a1, _) => state.withStack(a1 :: addr :: tail)
         case Node.SC(name, arguments, body) =>
           val (args, rest) = tail splitAt arguments.length
-          val env = argBindings(name, arguments, args, state.heap) ++ state.globals
+          val env = state.globals ++ argBindings(name, arguments, args, state.heap)
           val (newHeap, newAddress) = instantiate(state.heap, env, body)
 
           state.withHeap(newHeap).withStack(newAddress :: rest)
@@ -44,29 +49,31 @@ case object GraphReducer {
       case _ => throw new IllegalStateException("Expected to see function application here")
     })
 
-    Map( argNames zip addresses :_* )
+    Map(argNames zip addresses: _*)
   }
 
-  private def instantiate(heap: TiHeap, env: Env, body: CoreExpr): (TiHeap, Address) =
+  private def instantiate(heap: TiHeap, env: Env, body: CoreExpr, resultAddress: Option[Address] = None): (TiHeap, Address) =
     body match {
-      case Expr.Num(value)                    => heap.alloc(Node.Num(value))
-      case Expr.Var(name)                     => (heap, env.getOrThrow(name))
-      case Expr.Ap(lhs, rhs)                  =>
+      case Expr.Num(value) => heap.alloc(Node.Num(value), resultAddress)
+      case Expr.Var(name) =>
+        val varAddress = env.getOrThrow(name)
+        resultAddress.fold((heap, varAddress))(_ => heap.alloc(Node.Ref(varAddress), resultAddress))
+      case Expr.Ap(lhs, rhs) =>
         val (heap1, addr1) = instantiate(heap, env, lhs)
         val (heap2, addr2) = instantiate(heap1, env, rhs)
-        heap2.alloc(Node.App(addr1, addr2))
-      case Expr.Let(isRec, definitions, body) =>
-        def instDef(heapEnv: (TiHeap, Env), defn: (Name, CoreExpr)): (TiHeap, Env) = {
-          val (heap, env) = heapEnv
-          val (name, value) = defn
-          val (newHeap, addr) = instantiate(heap, env, value)
-          (newHeap, env.updated(name, addr))
-        }
-        val (newHeap, newEnv): (TiHeap, Env) = definitions.foldLeft (heap, env) (instDef)
-        instantiate(newHeap, newEnv, body)
-      case Expr.Constr(tag, arity)            => ???
-      case Expr.Case(expr, alternatives)      => ???
-      case Expr.Lambda(variables, body)       => ???
-    }
+        heap2.alloc(Node.App(addr1, addr2), resultAddress)
+      case Expr.Let(_, definitions, body) =>
+        val (heapWithDefs, envWithDefs): (TiHeap, Env) = definitions.foldLeft(heap, env)((acc, defn) => {
+          val (newHeap, reservedAddress) = acc._1.reserve()
+          (newHeap, acc._2.updated(defn._1, reservedAddress))
+        })
 
+        val finalHeap: TiHeap = definitions.foldLeft(heapWithDefs)((accHeap, defn) =>
+          instantiate(accHeap, envWithDefs, defn._2, Some(envWithDefs.getOrThrow(defn._1)))._1)
+
+        instantiate(finalHeap, envWithDefs, body)
+      case Expr.Constr(tag, arity) => ???
+      case Expr.Case(expr, alternatives) => ???
+      case Expr.Lambda(variables, body) => ???
+    }
 }
