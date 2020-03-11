@@ -15,7 +15,7 @@ case object EvaluationPrettyPrinter {
   }
 
   def printState(previousState: Option[State], state: State): PrintableText = {
-    val previousHeap = previousState.map(s => s.heap).getOrElse(Heap())
+    val previousHeap = previousState.map(s => s.heap).getOrElse(Heap.empty())
     val newHeapAddresses = state.heap.addresses().removedAll(previousHeap.addresses()).toList
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))
     concat(
@@ -53,15 +53,17 @@ case object EvaluationPrettyPrinter {
 
   private def heapEntry(node: Node): PrintableText = node match {
     case Node.App(a1, a2) => s"[$a1] [$a2]"
-    case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.prettyPrint(body))
+    case Node.Ref(a) => s"[$a*]"
+    case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
   }
 
   private def printSpineNode(address: Address, heap: TiHeap, globals: Globals): PrintableText = {
 
     val heapValue: PrintableText = heap.lookup(address) match {
+      case Node.Ref(a) => s"[$a*]"
       case Node.App(a1, a2) => s"[$a1] ----> [$a2]"
-      case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.prettyPrint(body))
+      case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
       case Node.Num(value) => s"$value"
     }
     Str(f"[$address%2d]: ") ++ Indented(heapValue)

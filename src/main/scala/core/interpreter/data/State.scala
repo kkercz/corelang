@@ -12,5 +12,5 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
 }
 
 object State {
-  def empty(): State = data.State(List(), Heap(), List(), Map(), Stats())
+  def empty(): State = data.State(List(), Heap.empty(), List(), Map(), Stats())
 }

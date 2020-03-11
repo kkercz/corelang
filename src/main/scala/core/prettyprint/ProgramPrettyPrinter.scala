@@ -15,7 +15,7 @@ case object ProgramPrettyPrinter {
     name ++ joinWithSpacePrefix(vars) ++ " = " ++ Indented(ppr(value))
   })
 
-  private def ppr(expr: CoreExpr): PrintableText = expr match {
+  def ppr(expr: CoreExpr): PrintableText = expr match {
     case Var(name) => name
     case Num(value) => value.toString
     case Constr(tag, arity) => s"Pack{$tag, $arity}"

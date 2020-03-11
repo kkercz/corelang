@@ -8,7 +8,7 @@ case object InitialStateCompiler {
   def compile(program: CoreProgram): State = {
     val scs = program ++ Prelude.builtInFunctions
     val (initialHeap, globals): (TiHeap, Globals) =
-      scs.foldLeft((Heap[Node](), Map[Name, Address]()))({
+      scs.foldLeft((Heap.empty[Node](), Map[Name, Address]()))({
         case ((heap, globals), sc) =>
           val (newHeap, scAddress) =
             heap.alloc(Node.SC(sc.name, sc.vars, sc.body))
