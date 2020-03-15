@@ -16,7 +16,10 @@ case object GraphReducer {
   }
 
   def prepare(previousState: State, state: State): State = {
-    state.withStats(state.stats.incrSteps())
+    val newStats = state.stats.incrSteps()
+    val reductionHappened = previousState.heap.lookup(previousState.stack.head).isInstanceOf[Node.SC]
+    val newStats2 = if (reductionHappened) newStats.incrReductions() else newStats
+    state.withStats(newStats2)
   }
 
   private def isFinal(state: State): Boolean = state.stack match {

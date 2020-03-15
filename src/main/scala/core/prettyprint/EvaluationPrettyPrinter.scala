@@ -19,9 +19,9 @@ case object EvaluationPrettyPrinter {
     val newHeapAddresses = state.heap.addresses().removedAll(previousHeap.addresses()).toList
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))
     concat(
-      "-" * 10, s" Step ${state.stats.steps} ", "-" * 10, Newline, Newline,
+      "-" * 10, s" Step ${state.stats.steps} (reductions: ${state.stats.reductions}) ", "-" * 10, Newline, Newline,
       interleave(
-        Newline ++ "       |" ++ Newline ++ "       V" ++ Newline,
+        Newline ++ "      |" ++ Newline ++ "      |" ++ Newline,
         state.stack.reverse map { node => printSpineNode(node, state.heap, state.globals) }), Newline, Newline,
       printHeapEntries(state.heap, newHeapAddresses, "new heap entries"), Newline, Newline,
       printHeapEntries(state.heap, allRelevantAddresses, "relevant heap entries")
@@ -41,28 +41,28 @@ case object EvaluationPrettyPrinter {
         case Nil => List()
       }
     }
-    allAddressesInUse(stack, heap, Set())
+    allAddressesInUse(stack, heap, Set()).distinct
 }
 
   private def printHeapEntries(heap: TiHeap, addresses: List[Address], name: String): PrintableText = {
     if (addresses.nonEmpty) concat(
         s"vvvvv $name vvvvv", Newline,
-        interleave(Newline, addresses.sorted.map(a => f"[$a%2d] = " ++ Indented(heapEntry(heap.lookup(a))))))
+        interleave(Newline, addresses.sorted.map(a => heapEntry(a, heap.lookup(a)))))
     else ""
   }
 
-  private def heapEntry(node: Node): PrintableText = node match {
+  private def heapEntry(a: Address, node: Node): PrintableText = f"[$a%2d] = " ++ Indented(node match {
     case Node.App(a1, a2) => s"[$a1] [$a2]"
     case Node.Ref(a) => s"[$a*]"
     case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
-  }
+  })
 
   private def printSpineNode(address: Address, heap: TiHeap, globals: Globals): PrintableText = {
 
     val heapValue: PrintableText = heap.lookup(address) match {
       case Node.Ref(a) => s"[$a*]"
-      case Node.App(a1, a2) => s"[$a1] ----> [$a2]"
+      case Node.App(a1, a2) => s"@[$a1] ---- " ++ heapEntry(a2, heap.lookup(a2))
       case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
       case Node.Num(value) => s"$value"
     }
