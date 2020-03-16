@@ -24,4 +24,11 @@ class InterpreterTest extends FlatSpec with Matchers {
   it should "run programs with letrec" in {
     Interpreter.compute(Examples.letrec) should be("4")
   }
+
+  it should "not recompute shared expressions" in {
+    Interpreter.runTemplateInstantiation(
+      """
+        |main = let id1 = I I I
+        |in id1 id1 3""".stripMargin).last.stats.reductions should be(5)
+  }
 }

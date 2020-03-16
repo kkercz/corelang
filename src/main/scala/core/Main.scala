@@ -4,8 +4,6 @@ import core.interpreter.Interpreter
 
 case object Main {
   def main(args: Array[String]): Unit = println(Interpreter.explain(
-    """
-      |square x = K x x ;
-      |main = square (square 3)
-      |""".stripMargin))
+    """main = let id1 = I I I
+      |in id1 id1 3""".stripMargin))
 }

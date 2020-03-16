@@ -8,7 +8,7 @@ import core.prettyprint.EvaluationPrettyPrinter
 
 case object Interpreter {
 
-  private def runTemplateInstantiation(program: String): List[State] = eval(compile(parseCoreProgram(program)))
+  def runTemplateInstantiation(program: String): List[State] = eval(compile(parseCoreProgram(program)))
 
   def compute(program: String): String = showResult(runTemplateInstantiation(program))
 

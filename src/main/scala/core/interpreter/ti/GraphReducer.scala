@@ -37,8 +37,9 @@ case object GraphReducer {
           val (args, rest) = tail splitAt arguments.length
           val env = state.globals ++ argBindings(name, arguments, args, state.heap)
           val (newHeap, newAddress) = instantiate(state.heap, env, body)
-
-          state.withHeap(newHeap).withStack(newAddress :: rest)
+          val redexRoot = if (args.isEmpty) addr else args.last
+          val updatedHeap = newHeap.update(redexRoot, Node.Ref(newAddress))
+          state.withHeap(updatedHeap).withStack(newAddress :: rest)
       }
     case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
@@ -60,7 +61,10 @@ case object GraphReducer {
       case Expr.Num(value) => heap.alloc(Node.Num(value), resultAddress)
       case Expr.Var(name) =>
         val varAddress = env.getOrThrow(name)
-        resultAddress.fold((heap, varAddress))(_ => heap.alloc(Node.Ref(varAddress), resultAddress))
+        resultAddress match {
+          case Some(_) => heap.alloc(Node.Ref(varAddress), resultAddress)
+          case None => (heap, varAddress)
+        }
       case Expr.Ap(lhs, rhs) =>
         val (heap1, addr1) = instantiate(heap, env, lhs)
         val (heap2, addr2) = instantiate(heap1, env, rhs)
