@@ -1,6 +1,7 @@
 package core.interpreter.data
 
 import core.ast.{CoreExpr, Name}
+import core.interpreter.ti.ArithmeticOperation
 
 sealed trait Node {
   final def isData: Boolean = this match {
@@ -19,4 +20,5 @@ object Node {
 
   case class Ref(a: Address) extends Node
 
+  case class Primitive(op: ArithmeticOperation) extends Node
 }

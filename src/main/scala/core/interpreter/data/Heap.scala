@@ -1,6 +1,7 @@
 package core.interpreter.data
 
 case class Heap[T](map: Map[Address, Option[T]]) {
+  def ++(heapToMergeWith: Heap[T]): Heap[T] = heapToMergeWith.addresses().foldLeft(this)((acc, addr) => acc.update(addr, heapToMergeWith.lookup(addr)))
 
   def update(address: Address, value: T): Heap[T] = Heap[T](map.updated(address, Some(value)))
 

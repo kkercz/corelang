@@ -31,4 +31,13 @@ class InterpreterTest extends FlatSpec with Matchers {
         |main = let id1 = I I I
         |in id1 id1 3""".stripMargin).last.stats.reductions should be(5)
   }
+
+  it should "handle arithmetic operations" in {
+    Interpreter.compute("main = negate 3") should be("-3")
+    Interpreter.compute("main = twice negate 3") should be("3")
+    Interpreter.compute("main = negate (I 3)") should be("3")
+    Interpreter.compute("main = 1 + 2") should be("3")
+    Interpreter.compute("square x = x * x; main = square square 3".stripMargin) should be("81")
+
+  }
 }

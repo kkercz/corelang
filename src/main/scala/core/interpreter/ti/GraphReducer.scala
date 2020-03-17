@@ -40,6 +40,7 @@ case object GraphReducer {
           val redexRoot = if (args.isEmpty) addr else args.last
           val updatedHeap = newHeap.update(redexRoot, Node.Ref(newAddress))
           state.withHeap(updatedHeap).withStack(newAddress :: rest)
+        case Node.Primitive(op) => ???
       }
     case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
