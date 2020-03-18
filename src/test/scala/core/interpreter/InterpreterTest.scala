@@ -35,9 +35,9 @@ class InterpreterTest extends FlatSpec with Matchers {
   it should "handle arithmetic operations" in {
     Interpreter.compute("main = negate 3") should be("-3")
     Interpreter.compute("main = twice negate 3") should be("3")
-    Interpreter.compute("main = negate (I 3)") should be("3")
-    Interpreter.compute("main = 1 + 2") should be("3")
-    Interpreter.compute("square x = x * x; main = square square 3".stripMargin) should be("81")
+    Interpreter.compute("main = negate (I 3)") should be("-3")
+    Interpreter.compute("main = (1*2 + 3*5 - 7) / 2") should be("5")
+    Interpreter.compute("square x = x * x; main = square (square 3)".stripMargin) should be("81")
 
   }
 }

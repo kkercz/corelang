@@ -7,10 +7,9 @@ import core.lang.Prelude
 case object InitialStateCompiler {
   def compile(program: CoreProgram): State = {
     val scs = program ++ Prelude.builtInFunctions
-    val (heapWithSupercombinators, globalSupercombinators): (TiHeap, Globals) = initGlobalNames[CoreSc](scs, sc => (sc.name, Node.SC(sc.name, sc.vars, sc.body)))
-    val (heapWithPrimitives, globalPrimitives): (TiHeap, Globals) = initGlobalNames[ArithmeticOperation](ArithmeticOperation.all, p => (p.symbol, Node.Primitive(p)))
+    val (heapWithSupercombinators, globalSupercombinators): (TiHeap, Globals) = initGlobalNames[CoreSc](Heap.empty())(scs, sc => (sc.name, Node.SC(sc.name, sc.vars, sc.body)))
+    val (initialHeap, globalPrimitives): (TiHeap, Globals) = initGlobalNames[ArithmeticOperation](heapWithSupercombinators)(ArithmeticOperation.all, p => (p.symbol, Node.Primitive(p)))
 
-    val initialHeap = heapWithSupercombinators ++ heapWithPrimitives
     val initialGlobals = globalSupercombinators ++ globalPrimitives
 
     val addressOfMain = initialGlobals.getOrElse("main", {
@@ -22,7 +21,7 @@ case object InitialStateCompiler {
     State(initialStack, initialHeap, initialDump, initialGlobals, Stats())
   }
 
-  def initGlobalNames[T](items: List[T], mapping: T => (Name, Node)): (TiHeap, Globals) = items.foldLeft((Heap.empty[Node](), Map[Name, Address]()))({
+  def initGlobalNames[T](initialHeap: TiHeap)(items: List[T], mapping: T => (Name, Node)): (TiHeap, Globals) = items.foldLeft((initialHeap, Map[Name, Address]()))({
     case ((heap, globals), item) =>
       val (name, node) = mapping(item)
       val (newHeap, scAddress) = heap.alloc(node)

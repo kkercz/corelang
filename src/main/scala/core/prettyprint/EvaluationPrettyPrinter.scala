@@ -6,12 +6,12 @@ import core.util.PrintableText.{Indented, Newline, Str, concat, fromString, inte
 
 case object EvaluationPrettyPrinter {
 
-  def prettyPrint(states: List[State]): PrintableText = {
+  def prettyPrint(states: List[State]): String = {
     val statesWithPrevious: List[(Option[State], State)] = (None, states.head) :: (states map { Some(_) } zip states.drop(1))
     interleave(
       Newline ++ Newline,
       statesWithPrevious map { case (previous, state) => printState(previous, state) }
-    )
+    ).printOut()
   }
 
   def printState(previousState: Option[State], state: State): PrintableText = {
@@ -19,7 +19,8 @@ case object EvaluationPrettyPrinter {
     val newHeapAddresses = state.heap.addresses().removedAll(previousHeap.addresses()).toList
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))
     concat(
-      "-" * 10, s" Step ${state.stats.steps} (reductions: ${state.stats.reductions}) ", "-" * 10, Newline, Newline,
+      "-" * 10, s" Step ${state.stats.steps} (reductions: ${state.stats.reductions}) ", "-" * 10, Newline,
+      "Dump: " ++ interleave(", ", state.dump.map(s => s.mkString("[", ", ", "]"))), Newline, Newline,
       interleave(
         Newline ++ "      |" ++ Newline ++ "      |" ++ Newline,
         state.stack.reverse map { node => printSpineNode(node, state.heap, state.globals) }), Newline, Newline,
@@ -56,6 +57,7 @@ case object EvaluationPrettyPrinter {
     case Node.Ref(a) => s"[$a*]"
     case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
+    case Node.Primitive(op) => s"[$a*]: ${op.symbol}"
   })
 
   private def printSpineNode(address: Address, heap: TiHeap, globals: Globals): PrintableText = {
@@ -65,6 +67,7 @@ case object EvaluationPrettyPrinter {
       case Node.App(a1, a2) => s"@[$a1] ---- " ++ heapEntry(a2, heap.lookup(a2))
       case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
       case Node.Num(value) => s"$value"
+      case Node.Primitive(op) => op.symbol
     }
     Str(f"[$address%2d]: ") ++ Indented(heapValue)
   }
