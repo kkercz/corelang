@@ -38,6 +38,32 @@ class InterpreterTest extends FlatSpec with Matchers {
     Interpreter.compute("main = negate (I 3)") should be("-3")
     Interpreter.compute("main = (1*2 + 3*5 - 7) / 2") should be("5")
     Interpreter.compute("square x = x * x; main = square (square 3)".stripMargin) should be("81")
+  }
 
+  it should "have proper boolean logic" in {
+    Interpreter.compute("main = not True") should be("False")
+    Interpreter.compute("main = not False") should be("True")
+    Interpreter.compute("main = True && True") should be("True")
+    Interpreter.compute("main = True && False") should be("False")
+    Interpreter.compute("main = False && True") should be("False")
+    Interpreter.compute("main = False && False") should be("False")
+    Interpreter.compute("main = True || True") should be("True")
+    Interpreter.compute("main = True || False") should be("True")
+    Interpreter.compute("main = False || True") should be("True")
+    Interpreter.compute("main = False || False") should be("False")
+  }
+
+  it should "support boolean operators and number comparisons" in {
+    Interpreter.compute("main = 1 < 2") should be("True")
+    Interpreter.compute("main = 2 > 3") should be("False")
+    Interpreter.compute("main = 2 >= 2 && 3 <= 4") should be("True")
+    Interpreter.compute("main = 1 != 1 || 2 == 2") should be("True")
+  }
+
+  it should "compute factorial with the `if` clause" in {
+    Interpreter.compute(
+      """
+        |fac n = if (n == 0) 1 (n * fac (n-1)) ;
+        |main = fac 3""".stripMargin) should be("6")
   }
 }

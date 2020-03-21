@@ -34,11 +34,9 @@ case object GraphReducer {
     case addr :: tail =>
       state.heap.lookup(addr) match {
         case Node.Ref(a) => state.withStack(a :: tail)
-        case Node.Num(_) =>
-          if (tail.isEmpty)
+        case data if data.isData && state.dump.nonEmpty =>
             state.withStack(state.dump.head).withDump(state.dump.tail)
-          else
-            throw new IllegalArgumentException("Number is not a function!")
+        case data if data.isData => throw new IllegalArgumentException(s"${data.display()} is not a function!")
         case Node.App(a1, _) => state.withStack(a1 :: addr :: tail)
         case Node.SC(name, arguments, body) =>
           val (args, rest) = tail.splitAt(arguments.length)
@@ -52,16 +50,17 @@ case object GraphReducer {
           val argNode = args
                         .map(a => state.heap.lookup(a).asInstanceOf[Node.App])
                         .map(app => (app.a2, deref(state.heap, state.heap.lookup(app.a2))))
-          val nonNumberArg = argNode.find(a => !a._2.isInstanceOf[Node.Num])
-          nonNumberArg match {
+          val nonAtomicArg = argNode.find(a => !a._2.isData)
+          nonAtomicArg match {
             case Some((addr, _)) =>
               state.withStack(addr :: Nil).withDump(state.stack :: state.dump)
             case None =>
               val redexRoot = args.last
-              val result = op.apply(argNode.map(a => a._2.asInstanceOf[Node.Num].value))
-              val newHeap = state.heap.update(redexRoot, Node.Num(result))
+              val result = op.apply(argNode.map(a => a._2))
+              val newHeap = state.heap.update(redexRoot, result)
               state.withStack(redexRoot :: rest).withHeap(newHeap)
           }
+        case Node.Constr(expr) => ???
       }
     case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
@@ -107,7 +106,7 @@ case object GraphReducer {
           instantiate(accHeap, envWithDefs, defn._2, Some(envWithDefs.getOrThrow(defn._1)))._1)
 
         instantiate(finalHeap, envWithDefs, body)
-      case Expr.Constr(tag, arity) => ???
+      case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]))
       case Expr.Case(expr, alternatives) => ???
       case Expr.Lambda(variables, body) => ???
     }

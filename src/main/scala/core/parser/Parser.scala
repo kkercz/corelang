@@ -38,18 +38,18 @@ case object Parser extends JavaTokenParsers {
   type PartialExpr = Option[(String, CoreExpr)]
 
   def pExpr1: Parser[CoreExpr] = pExpr2 ~ pExpr1c ^^ assembleOp
-  def pExpr1c: Parser[PartialExpr] = "|" ~ pExpr1 ^^ foundOp | notFound
+  def pExpr1c: Parser[PartialExpr] = "||" ~ pExpr1 ^^ foundOp | notFound
   def pExpr2: Parser[CoreExpr] = pExpr3 ~ pExpr2c ^^ assembleOp
-  def pExpr2c: Parser[PartialExpr] = "&" ~ pExpr2 ^^ foundOp | notFound
+  def pExpr2c: Parser[PartialExpr] = "&&" ~ pExpr2 ^^ foundOp | notFound
   def pExpr3: Parser[CoreExpr] = pExpr4 ~ pExpr3c ^^ assembleOp
-  def pExpr3c: Parser[PartialExpr] = ("<" | "<=" | "==" | "~=" | ">=" | ">") ~ pExpr4 ^^ foundOp | notFound
+  def pExpr3c: Parser[PartialExpr] = ("<=" | "<" | "==" | "!=" | ">=" | ">") ~ pExpr4 ^^ foundOp | notFound
   def pExpr4: Parser[CoreExpr] = pExpr5 ~ pExpr4c ^^ assembleOp
   def pExpr4c: Parser[PartialExpr] = "+" ~ pExpr4 ^^ foundOp |  "-" ~ pExpr5 ^^ foundOp | notFound
   def pExpr5: Parser[CoreExpr] = pExpr6 ~ pExpr5c ^^ assembleOp
   def pExpr5c: Parser[PartialExpr] = "*" ~ pExpr5 ^^ foundOp |  "/" ~ pExpr6 ^^ foundOp | notFound
   def pExpr6: Parser[CoreExpr] = pAtomic.+ ^^ {_ reduceLeft ((l, r) => Expr.Ap(l, r))}
 
-  def pPack: Parser[Expr.Constr[Name]] = "Pack{" ~> (wholeNumber ~ wholeNumber) <~ "}" ^^ { case n1 ~ n2 => Expr.Constr(n1.toInt, n2.toInt)}
+  def pPack: Parser[Expr.Constr[Name]] = "Pack{" ~> ((wholeNumber <~ ",") ~ wholeNumber) <~ "}" ^^ { case n1 ~ n2 => Expr.Constr(n1.toInt, n2.toInt)}
 
   def pNum: Parser[Expr.Num[Name]] = wholeNumber ^^ { str => Num(str.toInt) }
 

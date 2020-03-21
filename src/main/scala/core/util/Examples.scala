@@ -36,7 +36,7 @@ case object Examples {
       |               <2> p ps -> let rest = filter predicate ps in
       |                             if (predicate p) (cons p rest) rest ;
       |
-      |nonMultiple p n = ((n/p)*p) ~= n ;
+      |nonMultiple p n = ((n/p)*p) != n ;
       |
       |take n xs = if (n==0)
       |                 nil
