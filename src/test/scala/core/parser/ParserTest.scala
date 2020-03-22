@@ -38,7 +38,7 @@ class ParserTest extends FlatSpec with Matchers {
         |nonMultiple p n = ((n / p) * p) != n ;
         |take n xs = if (n == 0) nil (case xs of
         |                   <1> -> nil ;
-        |                   <2> p ps -> cons p (take (n -1) ps))""".stripMargin
+        |                   <2> p ps -> cons p (take (n - 1) ps))""".stripMargin
 
     ProgramPrettyPrinter.prettyPrint(Parser.parseCoreProgram(Examples.sieve)) should be (expectedResult)
   }

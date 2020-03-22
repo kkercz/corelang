@@ -51,7 +51,7 @@ case object Parser extends JavaTokenParsers {
 
   def pPack: Parser[Expr.Constr[Name]] = "Pack{" ~> ((wholeNumber <~ ",") ~ wholeNumber) <~ "}" ^^ { case n1 ~ n2 => Expr.Constr(n1.toInt, n2.toInt)}
 
-  def pNum: Parser[Expr.Num[Name]] = wholeNumber ^^ { str => Num(str.toInt) }
+  def pNum: Parser[Expr.Num[Name]] = """\d+""".r ^^ { str => Num(str.toInt) }
 
   def pVar: Parser[Expr.Var[Name]] = ident.withFilter(!Expr.keywords.contains(_)) ^^ { str => Var(str) }
 

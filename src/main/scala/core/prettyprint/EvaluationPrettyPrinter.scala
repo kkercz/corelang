@@ -58,6 +58,8 @@ case object EvaluationPrettyPrinter {
     case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
     case Node.Primitive(op) => s"[$a*]: ${op.symbol}"
+    case c: Node.Constr => s"[$a*]: ${c.display()}"
+    case Node.Case(expr, alternatives) => s"[$a] case $expr of $alternatives"
   })
 
   private def printSpineNode(address: Address, heap: TiHeap, globals: Globals): PrintableText = {
@@ -68,6 +70,8 @@ case object EvaluationPrettyPrinter {
       case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
       case Node.Num(value) => s"$value"
       case Node.Primitive(op) => op.symbol
+      case c: Node.Constr => c.display()
+      case Node.Case(expr, alternatives) => s"case $expr of $alternatives"
     }
     Str(f"[$address%2d]: ") ++ Indented(heapValue)
   }

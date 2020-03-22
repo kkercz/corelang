@@ -38,6 +38,7 @@ class InterpreterTest extends FlatSpec with Matchers {
     Interpreter.compute("main = negate (I 3)") should be("-3")
     Interpreter.compute("main = (1*2 + 3*5 - 7) / 2") should be("5")
     Interpreter.compute("square x = x * x; main = square (square 3)".stripMargin) should be("81")
+    Interpreter.compute("minus1 n = n-1 ; main = minus1 3") should be("2")
   }
 
   it should "have proper boolean logic" in {
@@ -60,10 +61,15 @@ class InterpreterTest extends FlatSpec with Matchers {
     Interpreter.compute("main = 1 != 1 || 2 == 2") should be("True")
   }
 
+  it should "evaluate case expressions" in {
+    Interpreter.compute("main = case Pack{1,0} of <1> -> 3") should be("3")
+    Interpreter.compute("main = case Pack{2,0} of <1> -> 3 ; <2> -> 4") should be("4")
+  }
+
   it should "compute factorial with the `if` clause" in {
     Interpreter.compute(
       """
-        |fac n = if (n == 0) 1 (n * fac (n-1)) ;
-        |main = fac 3""".stripMargin) should be("6")
+        |fac n = if (n == 0) 1 (n * fac (n - 1)) ;
+        |main = fac 10""".stripMargin) should be("3628800")
   }
 }

@@ -9,6 +9,8 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
   def withGlobals(globals: Globals): State = State(stack, heap, dump, globals, stats);
   def withStats(stats: Stats): State = State(stack, heap, dump, globals, stats);
 
+  def result: Node = heap.lookup(stack.last)
+
 }
 
 object State {

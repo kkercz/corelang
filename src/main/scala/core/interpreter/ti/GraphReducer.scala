@@ -34,6 +34,12 @@ case object GraphReducer {
     case addr :: tail =>
       state.heap.lookup(addr) match {
         case Node.Ref(a) => state.withStack(a :: tail)
+        case Node.Constr(expr, args) if args.isEmpty && expr.arity > 0 =>
+          val appliedArgs = arguments(state.stack.slice(1, expr.arity + 1), state.heap)
+          val newNode = Node.Constr(expr, appliedArgs)
+          val rootStack = state.stack.drop(expr.arity + 1)
+          val newHeap = state.heap.update(rootStack.head, newNode)
+          state.withStack(rootStack).withHeap(newHeap)
         case data if data.isData && state.dump.nonEmpty =>
             state.withStack(state.dump.head).withDump(state.dump.tail)
         case data if data.isData => throw new IllegalArgumentException(s"${data.display()} is not a function!")
@@ -60,7 +66,13 @@ case object GraphReducer {
               val newHeap = state.heap.update(redexRoot, result)
               state.withStack(redexRoot :: rest).withHeap(newHeap)
           }
-        case Node.Constr(expr) => ???
+        case Node.Case(expr, alternatives) => deref(state.heap, state.heap.lookup(expr)) match {
+            case constr: Node.Constr =>
+              val selectedCase = alternatives.find(p => p.tag == constr.expr.tag).getOrElse(throw new IllegalArgumentException(s"No case for tag ${constr.expr.tag}"))
+              val (newHeap, newAddr) = selectedCase.argsToExpression(state. heap, state.globals, constr.args)
+              state.withStack(newAddr :: tail).withHeap(newHeap.update(addr, Node.Ref(newAddr)))
+            case _ => state.withDump(state.stack :: state.dump).withStack(expr :: Nil)
+          }
       }
     case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
@@ -71,17 +83,17 @@ case object GraphReducer {
     case _ => n
   }
 
-  private def argBindings(fun: Name, argNames: List[Name], stack: Stack, heap: TiHeap): Map[Name, Address] = {
-    if (argNames.length != stack.length)
+  private def argBindings(fun: Name, argNames: List[Name], applicationNodes: List[Address], heap: TiHeap): Map[Name, Address] = {
+    if (argNames.length != applicationNodes.length)
       throw new IllegalArgumentException("Too few arguments provided to function " + fun)
 
-    val addresses: List[Address] = stack.map(addr => heap.lookup(addr) match {
-      case Node.App(_, arg) => arg
-      case _ => throw new IllegalStateException("Expected to see function application here")
-    })
-
-    Map(argNames zip addresses: _*)
+    Map(argNames zip arguments(applicationNodes, heap): _*)
   }
+
+  def arguments(applicationNodes: List[Address], heap: TiHeap): List[Address] = applicationNodes.map(addr => heap.lookup(addr) match {
+    case Node.App(_, arg) => arg
+    case _ => throw new IllegalStateException("Expected to see function application here")
+  })
 
   private def instantiate(heap: TiHeap, env: Env, body: CoreExpr, resultAddress: Option[Address] = None): (TiHeap, Address) =
     body match {
@@ -107,7 +119,15 @@ case object GraphReducer {
 
         instantiate(finalHeap, envWithDefs, body)
       case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]))
-      case Expr.Case(expr, alternatives) => ???
+      case Expr.Case(expr, alternatives) =>
+        val (newHeap, exprAddr) = instantiate(heap, env, expr)
+        newHeap.alloc(Node.Case(
+          exprAddr,
+          alternatives.map(a => Node.Alternative(a.tag, (heap: TiHeap, globals: Env, args: List[Address]) => {
+            val newEnv = globals ++ env ++ argBindings(expr.toString, a.args, args, newHeap)
+            instantiate(heap, newEnv, a.body)
+          }))
+        ))
       case Expr.Lambda(variables, body) => ???
     }
 }
