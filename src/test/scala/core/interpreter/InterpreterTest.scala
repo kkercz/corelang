@@ -75,6 +75,27 @@ class InterpreterTest extends FlatSpec with Matchers {
   }
 
   it should "have built-in functions for pairs" in {
-    Interpreter.compute("main = fst (snd (fst (MkPair (MkPair 1 (MkPair 2 3)) 4)))".stripMargin) should be("2")
+    Interpreter.compute("main = fst (snd (fst (MkPair (MkPair 1 (MkPair 2 3)) 4)))") should be("2")
+  }
+
+  it should "have built-in lists" in {
+    Interpreter.compute("main = head (Cons 1 Nil)") should be("1")
+    Interpreter.compute("main = tail (Cons 1 Nil)") should be("[]")
+    Interpreter.compute("main = length Nil") should be("0")
+    Interpreter.compute("main = length (Cons 1 Nil)") should be("1")
+    Interpreter.compute("main = length (Cons 1 (Cons 2 Nil))") should be("2")
+  }
+
+  it should "be able to handle infinite lists" in {
+    Interpreter.compute("""
+        |factor x = Cons x (factor (x + 1)) ;
+        |main = hd (tl (tl (factor 1)))""".stripMargin) should be("3")
+    Interpreter.compute("""
+        |infinite x = letrec xs = Cons x xs in xs ;
+        |main = hd (tl (tl (infinite 4)))""".stripMargin) should be("4")
+  }
+
+  it should "be lazy, so tail of empty list is never evaluated if not needed" in {
+    Interpreter.compute("main = fst (MkPair 1 (tail Nil))".stripMargin) should be("1")
   }
 }

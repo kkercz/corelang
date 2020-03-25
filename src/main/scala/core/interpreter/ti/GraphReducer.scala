@@ -61,7 +61,7 @@ case object GraphReducer {
             case Some((addr, _)) =>
               state.withStack(addr :: Nil).withDump(state.stack :: state.dump)
             case None =>
-              val redexRoot = args.last
+              val redexRoot = if (args.isEmpty) addr else args.last
               val result = op.apply(argNode.map(a => a._2))
               val newHeap = state.heap.update(redexRoot, result)
               state.withStack(redexRoot :: rest).withHeap(newHeap)

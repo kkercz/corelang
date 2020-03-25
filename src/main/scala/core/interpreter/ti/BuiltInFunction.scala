@@ -21,6 +21,12 @@ case object BuiltInFunction {
     override def apply(args: List[Node]): Node = withUnsafeCasts(symbol, Node.Num(0 - args.head.asInstanceOf[Node.Num].value))
   }
 
+  case object Abort extends BuiltInFunction {
+    override def symbol: String = "abort"
+    override def arity: Int = 0
+    override def apply(args: List[Node]): Node = throw new IllegalStateException("The program is faulty and has been aborted")
+  }
+
   case object Not extends BuiltInFunction {
     override def symbol: String = "not"
     override def arity: Int = 1
@@ -67,5 +73,7 @@ case object BuiltInFunction {
     BinaryFunction[Node.Constr]("||", (op1, op2) => if (op1 == True) True else op2)
   )
 
-  val all: List[BuiltInFunction] = arithmeticOperations ++ arithmeticComparisons ++ booleanOperators
+  val specialPrimitives = List(Abort)
+
+  val all: List[BuiltInFunction] = specialPrimitives ++ arithmeticOperations ++ arithmeticComparisons ++ booleanOperators
 }

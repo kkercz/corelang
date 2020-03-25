@@ -26,4 +26,10 @@ class InterpreterErrorsTest extends FlatSpec with Matchers {
       Interpreter.compute("main = negate False")
     }
   }
+
+  it should "throw illegal state exception if taking tail of empty list" in {
+    intercept[IllegalStateException] {
+      Interpreter.compute("main = snd (MkPair 1 (tail Nil))".stripMargin)
+    }
+  }
 }
