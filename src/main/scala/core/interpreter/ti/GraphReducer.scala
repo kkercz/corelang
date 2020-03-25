@@ -37,7 +37,7 @@ case object GraphReducer {
         case Node.Constr(expr, args) if args.isEmpty && expr.arity > 0 =>
           val appliedArgs = arguments(state.stack.slice(1, expr.arity + 1), state.heap)
           val newNode = Node.Constr(expr, appliedArgs)
-          val rootStack = state.stack.drop(expr.arity + 1)
+          val rootStack = state.stack.drop(expr.arity)
           val newHeap = state.heap.update(rootStack.head, newNode)
           state.withStack(rootStack).withHeap(newHeap)
         case data if data.isData && state.dump.nonEmpty =>
@@ -124,7 +124,7 @@ case object GraphReducer {
         newHeap.alloc(Node.Case(
           exprAddr,
           alternatives.map(a => Node.Alternative(a.tag, (heap: TiHeap, globals: Env, args: List[Address]) => {
-            val newEnv = globals ++ env ++ argBindings(expr.toString, a.args, args, newHeap)
+            val newEnv = globals ++ env ++ Map(a.args.zip(args): _*)
             instantiate(heap, newEnv, a.body)
           }))
         ))

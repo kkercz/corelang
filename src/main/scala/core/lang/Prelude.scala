@@ -24,7 +24,11 @@ case object Prelude {
       |True = Pack{2,0} ;
       |if c t e = case c of
       |           <1> -> e ;
-      |           <2> -> t
+      |           <2> -> t ;
+      |
+      |MkPair = Pack{1,2} ;
+      |fst p = case p of <1> a b -> a ;
+      |snd p = case p of <1> a b -> b
       |""".stripMargin
   )
 

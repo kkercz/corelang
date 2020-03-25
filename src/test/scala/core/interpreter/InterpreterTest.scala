@@ -64,6 +64,7 @@ class InterpreterTest extends FlatSpec with Matchers {
   it should "evaluate case expressions" in {
     Interpreter.compute("main = case Pack{1,0} of <1> -> 3") should be("3")
     Interpreter.compute("main = case Pack{2,0} of <1> -> 3 ; <2> -> 4") should be("4")
+    Interpreter.compute("main = case Pack{1,2} 3 2 of <1> a b -> a - b") should be("1")
   }
 
   it should "compute factorial with the `if` clause" in {
@@ -71,5 +72,9 @@ class InterpreterTest extends FlatSpec with Matchers {
       """
         |fac n = if (n == 0) 1 (n * fac (n - 1)) ;
         |main = fac 10""".stripMargin) should be("3628800")
+  }
+
+  it should "have built-in functions for pairs" in {
+    Interpreter.compute("main = fst (snd (fst (MkPair (MkPair 1 (MkPair 2 3)) 4)))".stripMargin) should be("2")
   }
 }
