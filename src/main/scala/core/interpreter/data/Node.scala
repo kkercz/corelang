@@ -37,5 +37,5 @@ object Node {
 
   case class Primitive(op: BuiltInFunction) extends Node
 
-  case class Alternative(tag: Int, argsToExpression: (TiHeap, Env, List[Address]) => (TiHeap, Address))
+  case class Alternative(expr: Expr.Alter[Name], env: Env)
 }

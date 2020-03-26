@@ -54,8 +54,9 @@ case object GraphReducer {
           }
         case Node.Case(expr, alternatives) => state.heapValue(expr) match {
             case constr: Node.Constr =>
-              val selectedCase = alternatives.find(p => p.tag == constr.expr.tag).getOrElse(throw new IllegalArgumentException(s"No case for tag ${constr.expr.tag}"))
-              val (newHeap, newAddr) = selectedCase.argsToExpression(state. heap, state.globals, constr.args)
+              val selectedCase = alternatives.find(p => p.expr.tag == constr.expr.tag).getOrElse(throw new IllegalArgumentException(s"No case for tag ${constr.expr.tag}"))
+              val newEnv = selectedCase.env ++ Map(selectedCase.expr.args.zip(constr.args): _*)
+              val (newHeap, newAddr) = instantiate(state.heap, newEnv, selectedCase.expr.body)
               state.withStack(newAddr :: tail).withHeap(newHeap.update(addr, Node.Ref(newAddr)))
             case _ => state.dumpCurrentStack(expr)
           }
@@ -89,13 +90,7 @@ case object GraphReducer {
       case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]))
       case Expr.Case(expr, alternatives) =>
         val (newHeap, exprAddr) = instantiate(heap, env, expr)
-        newHeap.alloc(Node.Case(
-          exprAddr,
-          alternatives.map(a => Node.Alternative(a.tag, (heap: TiHeap, globals: Env, args: List[Address]) => {
-            val newEnv = globals ++ env ++ Map(a.args.zip(args): _*)
-            instantiate(heap, newEnv, a.body)
-          }))
-        ))
+        newHeap.alloc(Node.Case(exprAddr, alternatives.map(a => Node.Alternative(a, env))))
       case Expr.Lambda(variables, body) => ???
     }
 }
