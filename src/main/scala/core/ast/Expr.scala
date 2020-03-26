@@ -20,7 +20,9 @@ object Expr {
 
   case class Num[T](value: Int) extends Expr[T]
 
-  case class Constr[T](tag: Int, arity: Int) extends Expr[T]
+  case class Constr[T](tag: Int, arity: Int) extends Expr[T] {
+    def syntax() = s"Pack{$tag, $arity}"
+  }
 
   case class Ap[T](lhs: Expr[T], rhs: Expr[T]) extends Expr[T]
 
