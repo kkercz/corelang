@@ -18,7 +18,10 @@ case object Parser extends JavaTokenParsers {
 
   def pExpr: Parser[CoreExpr] =  pLet | pCase | pLambda | pExpr1
 
-  def pAtomic: Parser[CoreExpr] = pPack | "(" ~> pExpr <~ ")" | pVar | pNum
+  def pList: Parser[CoreExpr] = "[" ~> zeroOrMoreWithSep(pExpr, ",") <~ "]" ^^ { exprs => exprs
+    .foldRight[CoreExpr](Var("Nil"))((head: CoreExpr, tail: CoreExpr) => Ap(Ap(Var("Cons"), head), tail)) }
+
+  def pAtomic: Parser[CoreExpr] = pPack | "(" ~> pExpr <~ ")" | pVar | pNum | pList
 
   def pLet: Parser[Expr.Let[Name]] = pLetKeyword ~ (pDefns <~ "in") ~ pExpr ^^ { case keyword ~ defns ~ expr => Expr.Let(keyword, defns, expr) }
 
@@ -57,6 +60,9 @@ case object Parser extends JavaTokenParsers {
 
   def oneOrMoreWithSep[T](p: Parser[T], sep: String): Parser[List[T]] =
     p ~ sep  ~ oneOrMoreWithSep(p, sep) ^^ { case head ~ _ ~ tail => head :: tail} | p ^^ {List(_)}
+
+  def zeroOrMoreWithSep[T](p: Parser[T], sep: String): Parser[List[T]] =
+    oneOrMoreWithSep(p, sep) | ("" ^^ { _ => Nil })
 
   def assembleOp(v: ~[CoreExpr, PartialExpr]):CoreExpr = v._2 match {
     case Some((op, rhs)) => Ap(Ap(Var(op), v._1), rhs)

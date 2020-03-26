@@ -29,24 +29,36 @@ case object Prelude {
       |           <1> -> e ;
       |           <2> -> t ;
       |
-      |MkPair = Pack{3,2} ;
-      |fst p = case p of <3> a b -> a ;
-      |snd p = case p of <3> a b -> b ;
-      |
-      |Nil = Pack{4,0} ;
-      |Cons = Pack{5,2} ;
+      |MkPair = Pack{1,2} ;
+      |fst p = case p of <1> a b -> a ;
+      |snd p = case p of <1> a b -> b
+      |""".stripMargin
+  )
+
+  val lists: List[CoreSc] = Parser.parseCoreProgram(
+    """
+      |Nil = Pack{1,0} ;
+      |Cons = Pack{2,2} ;
       |head = hd ;
       |hd list = case list of
-      |                     <4> -> abort ;
-      |                     <5> head tail -> head ;
+      |                     <1> -> abort ;
+      |                     <2> head tail -> head ;
       |tail = tl ;
       |tl list = case list of
-      |                     <4> -> abort ;
-      |                     <5> head tail -> tail ;
+      |                     <1> -> abort ;
+      |                     <2> head tail -> tail ;
       |length = len ;
       |len list = case list of
-      |                     <4> -> 0 ;
-      |                     <5> h t -> 1 + len t
+      |                     <1> -> 0 ;
+      |                     <2> h t -> 1 + len t ;
+      |
+      |drop n list = if (n == 0) list (case list of
+      |                     <1> -> Nil ;
+      |                     <2> head tail -> drop (n-1) tail) ;
+      |
+      |take n list = if (n == 0) Nil (case list of
+      |                     <1> -> Nil ;
+      |                     <2> head tail -> Cons head (take (n-1) tail))
       |""".stripMargin
   )
 

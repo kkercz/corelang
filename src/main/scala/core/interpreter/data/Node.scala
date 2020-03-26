@@ -16,7 +16,6 @@ sealed trait Node {
     case Node.Num(value) => value.toString
     case Node.Constr(expr, Nil) if expr == Prelude.trueLiteral => "True"
     case Node.Constr(expr, Nil) if expr == Prelude.falseLiteral => "False"
-    case Node.Constr(expr, Nil) if expr == Prelude.nilLiteral => "[]"
     case node => node.toString
   }
 }

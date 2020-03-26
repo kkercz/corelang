@@ -6,7 +6,7 @@ import core.lang.Prelude
 
 case object InitialStateCompiler {
   def compile(program: CoreProgram): State = {
-    val scs = Prelude.basicFunctions ++ Prelude.structuredData ++ program
+    val scs = Prelude.basicFunctions ++ Prelude.structuredData ++ Prelude.lists ++ program
     val (heapWithSupercombinators, globalSupercombinators): (TiHeap, Globals) = initGlobalNames[CoreSc](Heap.empty())(scs, sc => (sc.name, Node.SC(sc.name, sc.vars, sc.body)))
     val (initialHeap, globalPrimitives): (TiHeap, Globals) = initGlobalNames[BuiltInFunction](heapWithSupercombinators)(BuiltInFunction.all, p => (p.symbol, Node.Primitive(p)))
 

@@ -2,7 +2,8 @@ package core.parser
 
 import core.ast.Expr.{Ap, Num, Var}
 import core.ast.{CoreProgram, Supercombinator}
-import core.prettyprint.ProgramPrettyPrinter
+import core.parser.Parser.parseCoreProgram
+import core.prettyprint.ProgramPrettyPrinter.prettyPrint
 import core.util.Examples
 import org.scalatest.{FlatSpec, Matchers}
 
@@ -20,7 +21,7 @@ class ParserTest extends FlatSpec with Matchers {
       Supercombinator("double", List("x"), Ap(Ap(Var("+"), Var("x")), Var("x")))
     )
 
-    Parser.parseCoreProgram(input) should be(expectedResult)
+    parseCoreProgram(input) should be(expectedResult)
   }
 
   "Parser" should "parse the sieve of Eratosthenes" in {
@@ -40,6 +41,14 @@ class ParserTest extends FlatSpec with Matchers {
         |                   <1> -> nil ;
         |                   <2> p ps -> cons p (take (n - 1) ps))""".stripMargin
 
-    ProgramPrettyPrinter.prettyPrint(Parser.parseCoreProgram(Examples.sieve)) should be (expectedResult)
+    prettyPrint(parseCoreProgram(Examples.sieve)) should be (expectedResult)
+  }
+
+
+  it should "have a literal for lists" in {
+    prettyPrint(parseCoreProgram("main = []")) should be ("main = Nil")
+    prettyPrint(parseCoreProgram("main = [1]")) should be ("main = Cons 1 Nil")
+    prettyPrint(parseCoreProgram("main = [1,2,3]")) should be ("main = Cons 1 (Cons 2 (Cons 3 Nil))")
+    prettyPrint(parseCoreProgram("main = [1+2,I 2,3]")) should be ("main = Cons (1 + 2) (Cons (I 2) (Cons 3 Nil))")
   }
 }
