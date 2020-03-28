@@ -91,6 +91,6 @@ case object GraphReducer {
       case Expr.Case(expr, alternatives) =>
         val (newHeap, exprAddr) = instantiate(heap, env, expr)
         newHeap.alloc(Node.Case(exprAddr, alternatives.map(a => Node.Alternative(a, env))))
-      case Expr.Lambda(variables, body) => ???
+      case lambda: Expr.Lambda[Name] => heap.alloc(Node.SC("λ", lambda.variables, lambda.body))
     }
 }

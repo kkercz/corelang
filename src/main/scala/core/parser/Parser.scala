@@ -29,7 +29,7 @@ case object Parser extends JavaTokenParsers {
 
   def pLetKeyword: Parser[Boolean] = ("letrec" | "let") ^^ { k => k == "letrec"}
 
-  def pLambda: Parser[Expr.Lambda[Name]] = "\\" ~> pVar.+ ~ ("." ~> pExpr) ^^ { case vars ~ expr => Expr.Lambda(vars map { _.name }, expr)}
+  def pLambda: Parser[Expr.Lambda[Name]] = ("\\"|"λ") ~> pVar.+ ~ ("." ~> pExpr) ^^ { case vars ~ expr => Expr.Lambda(vars map { _.name }, expr)}
 
   def pCase: Parser[Case[Name]] = ("case" ~> pExpr <~ "of") ~ pAlts ^^ { case expr ~ alts => Case(expr, alts) }
 

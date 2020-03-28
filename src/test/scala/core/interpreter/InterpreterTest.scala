@@ -81,4 +81,8 @@ class InterpreterTest extends FlatSpec with Matchers {
   it should "be lazy, so tail of empty list is never evaluated if not needed" in {
     Interpreter.compute("main = fst (MkPair 1 (tail Nil))".stripMargin) should be("1")
   }
+
+  it should "evaluate lambda expressions" in {
+    Interpreter.compute("main = (λ a b . a - b) 3 2".stripMargin) should be("1")
+  }
 }
