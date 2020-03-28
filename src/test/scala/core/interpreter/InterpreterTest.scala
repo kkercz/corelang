@@ -85,4 +85,8 @@ class InterpreterTest extends FlatSpec with Matchers {
   it should "evaluate lambda expressions" in {
     Interpreter.compute("main = (λ a b . a - b) 3 2".stripMargin) should be("1")
   }
+
+  it should "evaluate the sieve of Eratosthenes" in {
+    Interpreter.compute(Examples.sieveUsingPrelude) should be("2 3 5 7 11 13 17 19 23 29")
+  }
 }

@@ -13,7 +13,10 @@ case object Interpreter {
 
   private def showResult(states: List[State]): String = {
     val finalState = states.last
-    finalState.heap.lookup(finalState.stack.head).display()
+    if (finalState.stack.isEmpty)
+      finalState.outputAsString()
+    else
+      finalState.heap.lookup(finalState.stack.head).display()
   }
 }
 

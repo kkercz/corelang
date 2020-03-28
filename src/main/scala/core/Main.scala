@@ -5,7 +5,7 @@ import core.parser.Parser
 import core.prettyprint.{EvaluationPrettyPrinter, ProgramPrettyPrinter}
 
 case object Main {
-  def main(args: Array[String]): Unit = explain("main = 1*2 + 3*5 - 7")
+  def main(args: Array[String]): Unit = explain("main = printList [1,2,3]")
 
   private def prettyPrint(program: String) = println(ProgramPrettyPrinter.prettyPrint(Parser.parseCoreProgram(program)))
 

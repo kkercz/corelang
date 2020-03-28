@@ -4,7 +4,10 @@ import core.interpreter.data
 
 import scala.annotation.tailrec
 
-case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats: Stats) {
+case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats: Stats, output: List[Node]) {
+
+  def appendToOutput(node: Node): State = State(stack, heap, dump, globals, stats, node :: output)
+  def outputAsString(): String = output.reverse.map(n => n.display()).mkString(" ")
 
   def applicationArguments(arity: Int, functionName: String = "???"): List[Address] =
     if (stack.tail.length < arity)
@@ -29,17 +32,17 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
     case n => n
   }
 
-  def withStack(stack: Stack): State = State(stack, heap, dump, globals, stats);
-  def withHeap(heap: TiHeap): State = State(stack, heap, dump, globals, stats);
-  def withGlobals(globals: Globals): State = State(stack, heap, dump, globals, stats);
-  def withStats(stats: Stats): State = State(stack, heap, dump, globals, stats);
+  def withStack(stack: Stack): State = State(stack, heap, dump, globals, stats, output);
+  def withHeap(heap: TiHeap): State = State(stack, heap, dump, globals, stats, output);
+  def withGlobals(globals: Globals): State = State(stack, heap, dump, globals, stats, output);
+  def withStats(stats: Stats): State = State(stack, heap, dump, globals, stats, output);
 
-  private def withDump(dump: Dump): State = State(stack, heap, dump, globals, stats);
+  private def withDump(dump: Dump): State = State(stack, heap, dump, globals, stats, output);
 
   def result: Node = heap.lookup(stack.last)
 
 }
 
 object State {
-  def empty(): State = data.State(List(), Heap.empty(), List(), Map(), Stats())
+  def empty(): State = data.State(List(), Heap.empty(), List(), Map(), Stats(), Nil)
 }

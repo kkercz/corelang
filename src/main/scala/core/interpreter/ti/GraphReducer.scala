@@ -3,29 +3,40 @@ package core.interpreter.ti
 import core.ast.{CoreExpr, Expr, Name}
 import core.interpreter.data._
 
+import scala.annotation.tailrec
+
 case object GraphReducer {
 
   type Env = Map[Name, Address]
 
+
   def eval(state: State): List[State] = {
-    if (isFinal(state)) {
-      List(state)
-    } else {
-      state :: eval(prepare(state, next(state)))
+    @tailrec
+    def eval(state: State, result: List[State]): List[State] = {
+      if (isFinal(state)) {
+        state :: result
+      } else {
+        val nextState = prepare(state, next(state))
+        eval(nextState, state :: result)
+      }
     }
+    eval(state, List()).reverse
   }
 
   def prepare(previousState: State, state: State): State = {
     val newStats = state.stats.incrSteps()
-    val previousStackHead = previousState.heap.lookup(previousState.stack.head)
-    val reductionHappened = (previousStackHead.isInstanceOf[Node.SC] || previousStackHead.isInstanceOf[Node.Primitive]) &&
-                            previousState.dump == state.dump
+    val maybePreviousStackHead = previousState.stack.headOption.map(previousState.heap.lookup)
+    val reductionHappened = maybePreviousStackHead match {
+      case Some(head) => (head.isInstanceOf[Node.SC] || head.isInstanceOf[Node.Primitive]) && previousState.dump == state.dump
+      case None => false
+    }
 
     val newStats2 = if (reductionHappened) newStats.incrReductions() else newStats
     state.withStats(newStats2)
   }
 
   private def isFinal(state: State): Boolean = state.stack match {
+    case Nil if state.dump.isEmpty => true
     case addr :: Nil => state.heap.lookup(addr).isData && state.dump.isEmpty
     case _ => false
   }
@@ -47,10 +58,15 @@ case object GraphReducer {
         case Node.Primitive(op) =>
           val argAddresses = state.applicationArguments(op.arity, op.symbol)
           val argNodes = argAddresses.map(state.heapValue)
-          val nonAtomicArg = argAddresses.zip(argNodes).find(a => !a._2.isData)
+          val nonAtomicArg = argAddresses.zip(argNodes).take(op.evaluatedArgumentsExpected).find(a => !a._2.isData)
           nonAtomicArg match {
             case Some((addr, _)) => state.dumpCurrentStack(addr)
-            case None => state.updateRedexRoot(op.arity, op.apply(argNodes))
+            case None =>
+              val (newState, newNode) = op.apply(state, argNodes)
+              newNode match {
+                case Some(value) => newState.updateRedexRoot(op.arity, value)
+                case None => newState.withStack(tail.drop(op.arity))
+              }
           }
         case Node.Case(expr, alternatives) => state.heapValue(expr) match {
             case constr: Node.Constr =>
@@ -61,6 +77,7 @@ case object GraphReducer {
             case _ => state.dumpCurrentStack(expr)
           }
       }
+    case Nil if state.dump.nonEmpty => state.popDump()
     case Nil => throw new IllegalStateException("Stack should not be null if we want to compute next state")
   }
 

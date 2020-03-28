@@ -22,7 +22,7 @@ case object Examples {
 
   val sieve: String =
     """
-      |main = take 3 (sieve (from 2)) ;
+      |main = printList (take 10 (sieve (from 2)));
       |
       |from n = cons n (from (n+1)) ;
       |
@@ -43,6 +43,20 @@ case object Examples {
       |                 (case xs of
       |                     <1> -> nil ;
       |                     <2> p ps -> cons p (take (n-1) ps))
+      |
+      |""".stripMargin
+
+  val sieveUsingPrelude: String =
+    """
+      |from n = Cons n (from (n+1)) ;
+      |
+      |nonMultiple p n = ((n/p)*p) != n ;
+      |
+      |sieve xs = case xs of
+      |       <1> -> nil ;
+      |       <2> p ps -> Cons p (sieve (filter (nonMultiple p) ps)) ;
+      |
+      |main = printList (take 10 (sieve (from 2)))
       |
       |""".stripMargin
 

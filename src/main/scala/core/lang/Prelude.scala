@@ -39,6 +39,8 @@ case object Prelude {
     """
       |Nil = Pack{1,0} ;
       |Cons = Pack{2,2} ;
+      |cons = Cons ;
+      |nil = Nil ;
       |head = hd ;
       |hd list = case list of
       |                     <1> -> abort ;
@@ -62,16 +64,19 @@ case object Prelude {
       |
       |filter f list = case list of
       |                   <1> -> Nil ;
-      |                   <2> head tail -> if (f head == True)
-      |                                     (Cons head (filter f tail))
-      |                                     (filter f tail) ;
+      |                   <2> head tail -> let rest = filter f tail in
+      |                                     if (f head) (Cons head rest) rest ;
       |
       |map f list = case list of <1> -> Nil ; <2> head tail -> Cons (f head) (map f tail) ;
       |
       |zipWith f l1 l2 = case l1 of
       |                           <1> -> Nil ;
       |                           <2> -> Cons (f (head l1) (head l2)) (zipWith f (tail l1) (tail l2)) ;
-      |zip = zipWith MkPair
+      |zip = zipWith MkPair ;
+      |
+      |printList list = case list of
+      |                   <1> -> stop ;
+      |                   <2> head tail -> print head (printList tail)
       |""".stripMargin
   )
 

@@ -27,7 +27,7 @@ class ParserTest extends FlatSpec with Matchers {
   "Parser" should "parse the sieve of Eratosthenes" in {
 
     val expectedResult =
-      """main = take 3 (sieve (from 2)) ;
+      """main = printList (take 10 (sieve (from 2))) ;
         |from n = cons n (from (n + 1)) ;
         |sieve xs = case xs of
         |                  <1> -> nil ;

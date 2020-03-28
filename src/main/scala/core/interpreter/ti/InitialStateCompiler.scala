@@ -18,7 +18,7 @@ case object InitialStateCompiler {
     val initialStack = List(addressOfMain)
     val initialDump = List()
 
-    State(initialStack, initialHeap, initialDump, initialGlobals, Stats())
+    State(initialStack, initialHeap, initialDump, initialGlobals, Stats(), List())
   }
 
   def initGlobalNames[T](initialHeap: TiHeap)(items: List[T], mapping: T => (Name, Node)): (TiHeap, Globals) = items.foldLeft((initialHeap, Map[Name, Address]()))({

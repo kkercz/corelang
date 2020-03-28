@@ -20,6 +20,7 @@ case object EvaluationPrettyPrinter {
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))
     concat(
       "-" * 10, s" Step ${state.stats.steps} (reductions: ${state.stats.reductions}) ", "-" * 10, Newline,
+      "Output: ", state.outputAsString(), Newline,
       "Dump: " ++ interleave(", ", state.dump.map(s => s.mkString("[", ", ", "]"))), Newline, Newline,
       interleave(
         Newline ++ "      |" ++ Newline ++ "      |" ++ Newline,
@@ -71,7 +72,7 @@ case object EvaluationPrettyPrinter {
       case Node.Num(value) => s"$value"
       case Node.Primitive(op) => op.symbol
       case c: Node.Constr => c.display()
-      case Node.Case(expr, alternatives) => s"case $expr of $alternatives"
+      case Node.Case(expr, alternatives) => s"case [$expr] of ${alternatives}"
     }
     Str(f"[$address%2d]: ") ++ Indented(heapValue)
   }
