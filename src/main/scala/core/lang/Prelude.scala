@@ -58,7 +58,20 @@ case object Prelude {
       |
       |take n list = if (n == 0) Nil (case list of
       |                     <1> -> Nil ;
-      |                     <2> head tail -> Cons head (take (n-1) tail))
+      |                     <2> head tail -> Cons head (take (n-1) tail)) ;
+      |
+      |filter f list = case list of
+      |                   <1> -> Nil ;
+      |                   <2> head tail -> if (f head == True)
+      |                                     (Cons head (filter f tail))
+      |                                     (filter f tail) ;
+      |
+      |map f list = case list of <1> -> Nil ; <2> head tail -> Cons (f head) (map f tail) ;
+      |
+      |zipWith f l1 l2 = case l1 of
+      |                           <1> -> Nil ;
+      |                           <2> -> Cons (f (head l1) (head l2)) (zipWith f (tail l1) (tail l2)) ;
+      |zip = zipWith MkPair
       |""".stripMargin
   )
 
