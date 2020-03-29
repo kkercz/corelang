@@ -2,6 +2,7 @@ package core.interpreter.ti
 
 import core.ast.{CoreExpr, Expr, Name}
 import core.interpreter.data._
+import core.interpreter.gc.GarbageCollector
 
 import scala.annotation.tailrec
 
@@ -27,12 +28,18 @@ case object GraphReducer {
     val newStats = state.stats.incrSteps()
     val maybePreviousStackHead = previousState.stack.headOption.map(previousState.heap.lookup)
     val reductionHappened = maybePreviousStackHead match {
-      case Some(head) => (head.isInstanceOf[Node.SC] || head.isInstanceOf[Node.Primitive]) && previousState.dump == state.dump
+      case Some(head) => (head match {
+        case _: Node.SC => true
+        case _: Node.Primitive => true
+        case Node.Constr(e, args) if e.arity == args.length => true
+        case _ => false }) && previousState.dump == state.dump
       case None => false
     }
 
     val newStats2 = if (reductionHappened) newStats.incrReductions() else newStats
-    state.withStats(newStats2)
+    val newState = GarbageCollector.gc(state.withStats(newStats2))
+
+    newState
   }
 
   private def isFinal(state: State): Boolean = state.stack match {

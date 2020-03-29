@@ -33,11 +33,10 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
   }
 
   def withStack(stack: Stack): State = State(stack, heap, dump, globals, stats, output);
+  def withDump(dump: Dump): State = State(stack, heap, dump, globals, stats, output);
   def withHeap(heap: TiHeap): State = State(stack, heap, dump, globals, stats, output);
   def withGlobals(globals: Globals): State = State(stack, heap, dump, globals, stats, output);
   def withStats(stats: Stats): State = State(stack, heap, dump, globals, stats, output);
-
-  private def withDump(dump: Dump): State = State(stack, heap, dump, globals, stats, output);
 
   def result: Node = heap.lookup(stack.last)
 

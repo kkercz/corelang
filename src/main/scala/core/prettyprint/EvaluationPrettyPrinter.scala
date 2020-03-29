@@ -20,6 +20,9 @@ case object EvaluationPrettyPrinter {
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))
     concat(
       "-" * 10, s" Step ${state.stats.steps} (reductions: ${state.stats.reductions}) ", "-" * 10, Newline,
+      s"GC: run ${state.stats.gcStats.timesRun} time(s),",
+      s"reclaimed ${state.stats.gcStats.reclaimedSpace} addresses, ",
+      s"took: ${state.stats.gcStats.elapsedTimeMs} ms", Newline,
       "Output: ", state.outputAsString(), Newline,
       "Dump: " ++ interleave(", ", state.dump.map(s => s.mkString("[", ", ", "]"))), Newline, Newline,
       interleave(
@@ -58,8 +61,8 @@ case object EvaluationPrettyPrinter {
     case Node.Ref(a) => s"[$a*]"
     case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
-    case Node.Primitive(op) => s"[$a*]: ${op.symbol}"
-    case c: Node.Constr => s"[$a*]: ${c.display()}"
+    case Node.Primitive(op) => s"${op.symbol}"
+    case c: Node.Constr => s"${c.display()}"
     case Node.Case(expr, alternatives) => s"[$a] case $expr of $alternatives"
   })
 

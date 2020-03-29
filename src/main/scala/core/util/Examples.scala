@@ -22,7 +22,7 @@ case object Examples {
 
   val sieve: String =
     """
-      |main = printList (take 10 (sieve (from 2)));
+      |main = printList (take 100 (sieve (from 2)));
       |
       |from n = cons n (from (n+1)) ;
       |
