@@ -1,8 +1,8 @@
 package core.interpreter.ti
 
 import core.ast.{CoreProgram, CoreSc, Name}
-import core.interpreter.data.{Address, Globals, Heap}
-import core.interpreter.ti.data.{Node, State, Stats}
+import core.interpreter.data.{Address, Globals, Heap, Stats}
+import core.interpreter.ti.data.{Node, State}
 import core.lang.Prelude
 
 case object InitialStateCompiler {
