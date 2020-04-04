@@ -1,7 +1,8 @@
 package core.interpreter.ti
 
 import core.ast.{CoreProgram, CoreSc, Name}
-import core.interpreter.data.{Address, Globals, Heap, Node, State, Stats, TiHeap}
+import core.interpreter.data.{Address, Globals, Heap}
+import core.interpreter.ti.data.{Node, State, Stats}
 import core.lang.Prelude
 
 case object InitialStateCompiler {
@@ -18,7 +19,7 @@ case object InitialStateCompiler {
     val initialStack = List(addressOfMain)
     val initialDump = List()
 
-    State(initialStack, initialHeap, initialDump, initialGlobals, Stats(), List())
+    data.State(initialStack, initialHeap, initialDump, initialGlobals, Stats(), List())
   }
 
   def initGlobalNames[T](initialHeap: TiHeap)(items: List[T], mapping: T => (Name, Node)): (TiHeap, Globals) = items.foldLeft((initialHeap, Map[Name, Address]()))({

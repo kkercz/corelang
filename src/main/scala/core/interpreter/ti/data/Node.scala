@@ -1,6 +1,7 @@
-package core.interpreter.data
+package core.interpreter.ti.data
 
 import core.ast.{CoreExpr, Expr, Name}
+import core.interpreter.data.Address
 import core.interpreter.ti.BuiltInFunction
 import core.interpreter.ti.GraphReducer.Env
 import core.lang.Prelude

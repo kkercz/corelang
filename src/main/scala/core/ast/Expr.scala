@@ -1,7 +1,7 @@
 package core.ast
 
 import core.ast.Expr.{Constr, Num, Var}
-import core.prettyprint.ProgramPrettyPrinter
+import core.parser.ProgramPrettyPrinter
 
 sealed trait Expr[+T] {
   def isAtomic: Boolean = this match {

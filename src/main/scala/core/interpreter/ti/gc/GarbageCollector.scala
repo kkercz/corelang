@@ -1,7 +1,9 @@
-package core.interpreter.gc
+package core.interpreter.ti.gc
 
-import core.interpreter.data.Node.Alternative
-import core.interpreter.data.{Address, Heap, Node, State, TiHeap, toInterpreterMap}
+import core.interpreter.data.{Address, Heap}
+import core.interpreter.ti.TiHeap
+import core.interpreter.ti.data.Node.Alternative
+import core.interpreter.ti.data.{Node, State}
 import core.util.Time
 
 import scala.annotation.tailrec
@@ -20,9 +22,9 @@ case object GarbageCollector {
       state
         .withHeap(toSpace)
         .withStats(state.stats.updateGcStats(reclaimedSpace, elapsedTime))
-        .withStack(state.stack.map(fromToMapping.getOrThrow))
-        .withGlobals(state.globals.map({ case (key, value) => (key, fromToMapping.getOrThrow(value)) }))
-        .withDump(state.dump.map(stack => stack.map(fromToMapping.getOrThrow)))
+        .withStack(state.stack.map(a => fromToMapping(a)))
+        .withGlobals(state.globals.map({ case (key, value) => (key, fromToMapping(value)) }))
+        .withDump(state.dump.map(stack => stack.map(a => fromToMapping(a))))
     }
   }
 
@@ -47,16 +49,16 @@ case object GarbageCollector {
     addresses.foldLeft((mapping, List[Address](), toSpace))({ case ((mapping, toScavenge, toSpace), addr) => toSpace.lookup(addr) match {
       case Node.App(a1, a2) =>
         val (newMapping, evacuated, toSpace2) = evacuate(mapping, List(a1, a2), fromSpace, toSpace)
-        val (a1Mapped, a2Mapped) = (newMapping.getOrThrow(a1), newMapping.getOrThrow(a2))
+        val (a1Mapped, a2Mapped) = (newMapping(a1), newMapping(a2))
         (newMapping, evacuated ++ toScavenge, toSpace2.update(addr, Node.App(a1Mapped, a2Mapped)))
       case Node.Constr(expr, args) =>
         val (newMapping, evacuated, toSpace2) = evacuate(mapping, args, fromSpace, toSpace)
-        (newMapping, evacuated ++ toScavenge, toSpace2.update(addr, Node.Constr(expr, args.map(newMapping.getOrThrow))))
+        (newMapping, evacuated ++ toScavenge, toSpace2.update(addr, Node.Constr(expr, args.map(a => newMapping(a)))))
       case Node.Case(expr, alternatives) =>
         val (newMapping, evacuated, toSpace2) = evacuate(mapping, expr :: alternatives.flatMap(a => a.env.values), fromSpace, toSpace)
         val newNode = Node.Case(
-          newMapping.getOrThrow(expr),
-          alternatives.map(a => Alternative(a.expr, a.env.map({ case (key, value) => (key, newMapping.getOrThrow(value)) })))
+          newMapping(expr),
+          alternatives.map(a => Alternative(a.expr, a.env.map({ case (key, value) => (key, newMapping(value)) })))
         )
         (newMapping, evacuated ++ toScavenge, toSpace2.update(addr, newNode))
       case Node.Ref(_) => throw new IllegalStateException("Ref node should not have been evacuated")

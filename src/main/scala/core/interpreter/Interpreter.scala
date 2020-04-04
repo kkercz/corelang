@@ -1,8 +1,8 @@
 package core.interpreter
 
-import core.interpreter.data.State
 import core.interpreter.ti.GraphReducer.eval
 import core.interpreter.ti.InitialStateCompiler.compile
+import core.interpreter.ti.data.State
 import core.parser.Parser.parseCoreProgram
 
 case object Interpreter {

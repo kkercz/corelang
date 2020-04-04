@@ -2,7 +2,8 @@ package core.interpreter.ti
 
 import core.ast.{CoreExpr, Expr, Name}
 import core.interpreter.data._
-import core.interpreter.gc.GarbageCollector
+import core.interpreter.ti.data.{Node, State}
+import core.interpreter.ti.gc.GarbageCollector
 
 import scala.annotation.tailrec
 
@@ -92,7 +93,7 @@ case object GraphReducer {
     body match {
       case Expr.Num(value) => heap.alloc(Node.Num(value), resultAddress)
       case Expr.Var(name) =>
-        val varAddress = env.getOrThrow(name)
+        val varAddress = env(name)
         resultAddress match {
           case Some(_) => heap.alloc(Node.Ref(varAddress), resultAddress)
           case None => (heap, varAddress)
@@ -108,7 +109,7 @@ case object GraphReducer {
         })
 
         val finalHeap: TiHeap = definitions.foldLeft(heapWithDefs)((accHeap, defn) =>
-          instantiate(accHeap, envWithDefs, defn._2, Some(envWithDefs.getOrThrow(defn._1)))._1)
+          instantiate(accHeap, envWithDefs, defn._2, Some(envWithDefs(defn._1)))._1)
 
         instantiate(finalHeap, envWithDefs, body)
       case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]))

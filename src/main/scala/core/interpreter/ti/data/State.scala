@@ -1,6 +1,8 @@
-package core.interpreter.data
+package core.interpreter.ti.data
 
-import core.interpreter.data
+import core.interpreter.data._
+import core.interpreter.ti
+import core.interpreter.ti.TiHeap
 
 import scala.annotation.tailrec
 
@@ -43,5 +45,5 @@ case class State(stack: Stack, heap: TiHeap, dump: Dump, globals: Globals, stats
 }
 
 object State {
-  def empty(): State = data.State(List(), Heap.empty(), List(), Map(), Stats(), Nil)
+  def empty(): State = ti.data.State(List(), Heap.empty(), List(), Map(), Stats(), Nil)
 }

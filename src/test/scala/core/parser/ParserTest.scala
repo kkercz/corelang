@@ -3,7 +3,7 @@ package core.parser
 import core.ast.Expr.{Ap, Num, Var}
 import core.ast.{CoreProgram, Supercombinator}
 import core.parser.Parser.parseCoreProgram
-import core.prettyprint.ProgramPrettyPrinter.prettyPrint
+import core.parser.ProgramPrettyPrinter.prettyPrint
 import core.util.Examples
 import org.scalatest.{FlatSpec, Matchers}
 

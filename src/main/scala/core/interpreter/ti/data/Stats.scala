@@ -1,4 +1,4 @@
-package core.interpreter.data
+package core.interpreter.ti.data
 
 case class Stats(steps: Int, reductions: Int, gcStats: GcStats) {
 

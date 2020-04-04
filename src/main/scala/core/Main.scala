@@ -1,9 +1,9 @@
 package core
 
 import core.interpreter.Interpreter.runTemplateInstantiation
-import core.interpreter.data.State
-import core.parser.Parser
-import core.prettyprint.{EvaluationPrettyPrinter, ProgramPrettyPrinter}
+import core.interpreter.ti.EvaluationPrettyPrinter
+import core.interpreter.ti.data.State
+import core.parser.{Parser, ProgramPrettyPrinter}
 import core.util.Examples
 
 case object Main {

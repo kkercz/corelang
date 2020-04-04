@@ -9,8 +9,8 @@ case class Heap[T](map: Map[Address, Option[T]]) {
 
   def alloc(value: T, address: Option[Address] = None): (Heap[T], Address) = {
     val addressToUse = address.getOrElse(nextFreeAddress())
-    if (address.isDefined && map.getOrThrow(address.get).isDefined) {
-      throw new IllegalArgumentException("Address already assigned to value: " + map.getOrThrow(address.get))
+    if (address.isDefined && map(address.get).isDefined) {
+      throw new IllegalArgumentException("Address already assigned to value: " + map(address.get))
     }
     (Heap(map.updated(addressToUse, Some(value))), addressToUse)
   }

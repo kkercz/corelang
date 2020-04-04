@@ -2,6 +2,7 @@ package core.prettyprint
 
 import core.ast.Expr.{Ap, Let, Num, Var}
 import core.ast.{CoreProgram, Supercombinator}
+import core.parser.ProgramPrettyPrinter
 import org.scalatest._
 
 class PrettyPrinterTest extends FlatSpec with Matchers {

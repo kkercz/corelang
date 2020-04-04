@@ -1,6 +1,8 @@
-package core.prettyprint
+package core.interpreter.ti
 
-import core.interpreter.data.{Address, Globals, Heap, Node, Stack, State, TiHeap}
+import core.interpreter.data.{Address, Globals, Heap, Stack}
+import core.interpreter.ti.data.{Node, State}
+import core.parser.ProgramPrettyPrinter
 import core.util.PrintableText
 import core.util.PrintableText.{Indented, Newline, Str, concat, fromString, interleave}
 

@@ -1,6 +1,6 @@
 package core.interpreter.ti
 
-import core.interpreter.data.{Node, State}
+import core.interpreter.ti.data.{Node, State}
 import core.lang.Prelude
 
 

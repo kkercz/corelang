@@ -1,4 +1,4 @@
-package core.prettyprint
+package core.parser
 
 import core.ast.Expr._
 import core.ast._
