@@ -1,6 +1,6 @@
 package core.interpreter.gm.data
 
-import core.interpreter.data.{Globals, Stack, Stats}
+import core.interpreter.data.{Globals, Heap, Stack, Stats}
 import core.interpreter.gm.{GmCode, GmHeap}
 
 case class State(code: GmCode, stack: Stack, heap: GmHeap, globals: Globals, stats: Stats) {
@@ -14,4 +14,8 @@ case class State(code: GmCode, stack: Stack, heap: GmHeap, globals: Globals, sta
     val (newHeap, addr) = heap.alloc(node)
     withStack(addr :: stack).withHeap(newHeap)
   }
+}
+
+object State {
+  def empty(): State = State(List(), List(), Heap.empty(), Map(), Stats())
 }

@@ -1,6 +1,6 @@
 package core
 
-import core.interpreter.Interpreter.runTemplateInstantiation
+import core.interpreter.TiInterpreter.runTemplateInstantiation
 import core.interpreter.ti.EvaluationPrettyPrinter
 import core.interpreter.ti.data.State
 import core.parser.{Parser, ProgramPrettyPrinter}

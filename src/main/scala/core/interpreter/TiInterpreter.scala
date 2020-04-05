@@ -5,7 +5,7 @@ import core.interpreter.ti.InitialStateCompiler.compile
 import core.interpreter.ti.data.State
 import core.parser.Parser.parseCoreProgram
 
-case object Interpreter {
+case object TiInterpreter {
 
   def runTemplateInstantiation(program: String): List[State] = eval(compile(parseCoreProgram(program)))
 

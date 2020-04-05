@@ -8,28 +8,28 @@ class InterpreterErrorsTest extends FlatSpec with Matchers {
 
   it should "throw an illegal argument exception if too many arguments applied to function" in {
     intercept[IllegalArgumentException] {
-      Interpreter.compute("main = I 2 2")
+      TiInterpreter.compute("main = I 2 2")
     }
   }
 
   it should "throw an illegal argument exception if too few arguments applied to function" in {
     intercept[IllegalArgumentException] {
-      Interpreter.compute("main = I")
+      TiInterpreter.compute("main = I")
     }
   }
 
   it should "throw an illegal argument exception if invalid types are used for built-in operators" in {
     intercept[IllegalArgumentException] {
-      Interpreter.compute("main = 1 && 2")
-      Interpreter.compute("main = True < 1")
-      Interpreter.compute("main = not 1")
-      Interpreter.compute("main = negate False")
+      TiInterpreter.compute("main = 1 && 2")
+      TiInterpreter.compute("main = True < 1")
+      TiInterpreter.compute("main = not 1")
+      TiInterpreter.compute("main = negate False")
     }
   }
 
   it should "throw illegal state exception if taking tail of empty list" in {
     intercept[IllegalStateException] {
-      Interpreter.compute("main = snd (MkPair 1 (tail Nil))".stripMargin)
+      TiInterpreter.compute("main = snd (MkPair 1 (tail Nil))".stripMargin)
     }
   }
 }
