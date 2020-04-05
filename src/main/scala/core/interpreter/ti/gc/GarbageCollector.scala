@@ -3,14 +3,14 @@ package core.interpreter.ti.gc
 import core.interpreter.data.{Address, Heap}
 import core.interpreter.ti.TiHeap
 import core.interpreter.ti.data.Node.Alternative
-import core.interpreter.ti.data.{Node, State}
+import core.interpreter.ti.data.{Node, TiState}
 import core.util.Time
 
 import scala.annotation.tailrec
 
 case object GarbageCollector {
 
-  def gc(state: State): State = {
+  def gc(state: TiState): TiState = {
     if (state.heap.addresses().size < 1000) {
       state
     } else {

@@ -1,22 +1,22 @@
 package core.interpreter.ti
 
 import core.interpreter.data.{Address, Globals, Heap, Stack}
-import core.interpreter.ti.data.{Node, State}
+import core.interpreter.ti.data.{Node, TiState}
 import core.parser.ProgramPrettyPrinter
 import core.util.PrintableText
 import core.util.PrintableText.{Indented, Newline, Str, concat, fromString, interleave}
 
 case object EvaluationPrettyPrinter {
 
-  def prettyPrint(states: List[State]): String = {
-    val statesWithPrevious: List[(Option[State], State)] = (None, states.head) :: (states map { Some(_) } zip states.drop(1))
+  def prettyPrint(states: List[TiState]): String = {
+    val statesWithPrevious: List[(Option[TiState], TiState)] = (None, states.head) :: (states map { Some(_) } zip states.drop(1))
     interleave(
       Newline ++ Newline,
       statesWithPrevious map { case (previous, state) => printState(previous, state) }
     ).printOut()
   }
 
-  def printState(previousState: Option[State], state: State): PrintableText = {
+  def printState(previousState: Option[TiState], state: TiState): PrintableText = {
     val previousHeap = previousState.map(s => s.heap).getOrElse(Heap.empty())
     val newHeapAddresses = state.heap.addresses().removedAll(previousHeap.addresses()).toList
     val allRelevantAddresses = allAddressesInUse(state.stack, state.heap).filter(a => !newHeapAddresses.contains(a))

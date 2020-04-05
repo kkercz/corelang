@@ -1,6 +1,6 @@
 package core.interpreter.ti
 
-import core.interpreter.ti.data.{Node, State}
+import core.interpreter.ti.data.{Node, TiState}
 import core.lang.Prelude
 
 
@@ -8,7 +8,7 @@ sealed trait BuiltInFunction {
   def symbol: String
   def arity: Int
   def evaluatedArgumentsExpected: Int = arity
-  def apply(state: State, args: List[Node]): (State, Option[Node])
+  def apply(state: TiState, args: List[Node]): (TiState, Option[Node])
 }
 
 case object BuiltInFunction {
@@ -17,7 +17,7 @@ case object BuiltInFunction {
   val False: Node.Constr = Node.Constr(Prelude.falseLiteral)
 
   abstract class PureBuiltInFunction extends BuiltInFunction {
-    final override def apply(state: State, args: List[Node]): (State, Option[Node]) = (state, Some(apply(args)))
+    final override def apply(state: TiState, args: List[Node]): (TiState, Option[Node]) = (state, Some(apply(args)))
     def apply(args: List[Node]): Node
   }
 
@@ -37,13 +37,13 @@ case object BuiltInFunction {
     override def symbol: String = "print"
     override def arity: Int = 2
     override def evaluatedArgumentsExpected: Int = 1
-    override def apply(state: State, args: List[Node]): (State, Option[Node]) = (state.appendToOutput(args.head), Some(args.tail.head))
+    override def apply(state: TiState, args: List[Node]): (TiState, Option[Node]) = (state.appendToOutput(args.head), Some(args.tail.head))
   }
 
   case object Stop extends BuiltInFunction {
     override def symbol: String = "stop"
     override def arity: Int = 0
-    override def apply(state: State, args: List[Node]): (State, Option[Node]) = (state, None)
+    override def apply(state: TiState, args: List[Node]): (TiState, Option[Node]) = (state, None)
   }
 
   case object Not extends PureBuiltInFunction {

@@ -2,7 +2,7 @@ package core.interpreter.ti
 
 import core.ast.{CoreExpr, Expr, Name}
 import core.interpreter.data._
-import core.interpreter.ti.data.{Node, State}
+import core.interpreter.ti.data.{Node, TiState}
 import core.interpreter.ti.gc.GarbageCollector
 
 import scala.annotation.tailrec
@@ -12,9 +12,9 @@ case object GraphReducer {
   type Env = Map[Name, Address]
 
 
-  def eval(state: State): List[State] = {
+  def eval(state: TiState): List[TiState] = {
     @tailrec
-    def eval(state: State, result: List[State]): List[State] = {
+    def eval(state: TiState, result: List[TiState]): List[TiState] = {
       if (isFinal(state)) {
         state :: result
       } else {
@@ -25,7 +25,7 @@ case object GraphReducer {
     eval(state, List()).reverse
   }
 
-  def prepare(previousState: State, state: State): State = {
+  def prepare(previousState: TiState, state: TiState): TiState = {
     val newStats = state.stats.incrSteps()
     val maybePreviousStackHead = previousState.stack.headOption.map(previousState.heap.lookup)
     val reductionHappened = maybePreviousStackHead match {
@@ -43,13 +43,13 @@ case object GraphReducer {
     newState
   }
 
-  private def isFinal(state: State): Boolean = state.stack match {
+  private def isFinal(state: TiState): Boolean = state.stack match {
     case Nil if state.dump.isEmpty => true
     case addr :: Nil => state.heap.lookup(addr).isData && state.dump.isEmpty
     case _ => false
   }
 
-  private def next(state: State): State = state.stack match {
+  private def next(state: TiState): TiState = state.stack match {
     case addr :: tail =>
       state.heap.lookup(addr) match {
         case Node.Ref(a) => state.withStack(a :: tail)
