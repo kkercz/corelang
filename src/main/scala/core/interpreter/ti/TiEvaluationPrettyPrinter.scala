@@ -6,7 +6,7 @@ import core.parser.ProgramPrettyPrinter
 import core.util.PrintableText
 import core.util.PrintableText.{Indented, Newline, Str, concat, fromString, interleave}
 
-case object EvaluationPrettyPrinter {
+case object TiEvaluationPrettyPrinter {
 
   def prettyPrint(states: List[TiState]): String = {
     val statesWithPrevious: List[(Option[TiState], TiState)] = (None, states.head) :: (states map { Some(_) } zip states.drop(1))

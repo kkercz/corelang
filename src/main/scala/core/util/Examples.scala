@@ -73,6 +73,12 @@ case object Examples {
       |""".stripMargin
 
 
+  val lazyExample: String =
+    """twice f x = f (f x) ;
+      |id x = x ;
+      |main = twice twice id 3""".stripMargin
+
+
   val examplePrograms = Seq(
     basic1, basic2, basic3, let1, let2, let3, sieve, letrec
   )
