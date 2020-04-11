@@ -1,9 +1,9 @@
 package core.ast
 
 import core.ast.Expr.{Constr, Num, Var}
-import core.parser.ProgramPrettyPrinter
+import core.ast.prettyprint.{HasName, ProgramPrettyPrinter}
 
-sealed trait Expr[+T] {
+sealed trait Expr[T] {
   def isAtomic: Boolean = this match {
     case Var(_)       => true
     case Num(_)       => true
@@ -11,10 +11,7 @@ sealed trait Expr[+T] {
     case _            => false
   }
 
-  def syntax(): String = this match {
-    case expr: Expr[Name] => ProgramPrettyPrinter.prettyPrint(expr)
-    case e => e.toString
-  }
+  def syntax()(implicit hn: HasName[T]): String = ProgramPrettyPrinter.prettyPrint(this)
 }
 
 object Expr {
@@ -27,7 +24,7 @@ object Expr {
   case class Num[T](value: Int) extends Expr[T]
 
   case class Constr[T](tag: Int, arity: Int) extends Expr[T] {
-    override def syntax() = s"Pack{$tag, $arity}"
+    override def syntax()(implicit hn: HasName[T]) = s"Pack{$tag, $arity}"
   }
 
   case class Ap[T](lhs: Expr[T], rhs: Expr[T]) extends Expr[T]
@@ -46,7 +43,7 @@ object Expr {
   case class Alter[T](tag: Int, args: List[T], body: Expr[T])
 
   case class Lambda[T](variables: List[T], body: Expr[T]) extends Expr[T] {
-    override def syntax() = s"λ ${variables.mkString(" ")} . ${body.syntax()}"
+    override def syntax()(implicit hn: HasName[T]) = s"λ ${variables.mkString(" ")} . ${body.syntax()}"
   }
 
   // Utility Functions

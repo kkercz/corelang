@@ -1,11 +1,12 @@
 package core
 
+import core.ast.prettyprint.ProgramPrettyPrinter
 import core.interpreter.Interpreter
 import core.interpreter.gm.GmEvaluationPrettyPrinter
 import core.interpreter.gm.data.State
 import core.interpreter.ti.TiEvaluationPrettyPrinter
 import core.interpreter.ti.data.TiState
-import core.parser.{Parser, ProgramPrettyPrinter}
+import core.parser.Parser
 import core.util.Examples
 
 case object Main {

@@ -48,7 +48,7 @@ case object GmEvaluationPrettyPrinter {
 
   def printCode(code: GmCode): String = code.map(printInstruction).mkString("[", ", ", "]")
 
-  def printInstruction(inst: Instruction) = inst match {
+  def printInstruction(inst: Instruction): String = inst match {
     case Instruction.Unwind => "Unwind"
     case Instruction.MkApp => "MkApp"
     case Instruction.PushGlobal(name) => "PushGlobal " + name

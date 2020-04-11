@@ -9,7 +9,7 @@ sealed trait PrintableText {
 
   def printOut(): String = {
 
-    val result = new StringBuilder();
+    val result = new StringBuilder()
 
     @tailrec
     def flatten(column: Int, value: List[(PrintableText, Int)]): String =

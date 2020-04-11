@@ -1,8 +1,8 @@
 package core.interpreter.ti
 
+import core.ast.prettyprint.ProgramPrettyPrinter
 import core.interpreter.data.{Address, Globals, Heap, Stack}
 import core.interpreter.ti.data.{Node, TiState}
-import core.parser.ProgramPrettyPrinter
 import core.util.PrintableText
 import core.util.PrintableText.{Indented, Newline, Str, concat, fromString, interleave}
 
@@ -77,7 +77,7 @@ case object TiEvaluationPrettyPrinter {
       case Node.Num(value) => s"$value"
       case Node.Primitive(op) => op.symbol
       case c: Node.Constr => c.display()
-      case Node.Case(expr, alternatives) => s"case [$expr] of ${alternatives}"
+      case Node.Case(expr, alternatives) => s"case [$expr] of $alternatives"
     }
     Str(f"[$address%2d]: ") ++ Indented(heapValue)
   }
