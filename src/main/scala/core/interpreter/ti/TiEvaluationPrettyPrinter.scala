@@ -61,7 +61,7 @@ case object TiEvaluationPrettyPrinter {
   private def heapEntry(a: Address, node: Node): PrintableText = f"[$a%2d] = " ++ Indented(node match {
     case Node.App(a1, a2) => s"[$a1] [$a2]"
     case Node.Ref(a) => s"[$a*]"
-    case Node.SC(name, bindings, body) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
+    case Node.SC(name, bindings, body, _) =>s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
     case Node.Num(value) => value.toString
     case Node.Primitive(op) => s"${op.symbol}"
     case c: Node.Constr => s"${c.display()}"
@@ -73,7 +73,7 @@ case object TiEvaluationPrettyPrinter {
     val heapValue: PrintableText = heap.lookup(address) match {
       case Node.Ref(a) => s"[$a*]"
       case Node.App(a1, a2) => s"@[$a1] ---- " ++ heapEntry(a2, heap.lookup(a2))
-      case Node.SC(name, bindings, body) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
+      case Node.SC(name, bindings, body, _) => s"$name" + " " + bindings.mkString(" ") + " = " ++ Indented(ProgramPrettyPrinter.ppr(body))
       case Node.Num(value) => s"$value"
       case Node.Primitive(op) => op.symbol
       case c: Node.Constr => c.display()

@@ -25,7 +25,7 @@ object Node {
 
   case class App(a1: Address, a2: Address) extends Node
 
-  case class SC(name: Name, bindings: List[Name], body: CoreExpr) extends Node
+  case class SC(name: Name, bindings: List[Name], body: CoreExpr, closure: Env = Map()) extends Node
 
   case class Num(value: Int) extends Node
 

@@ -89,6 +89,20 @@ class TiInterpreterTest extends FlatSpec with Matchers {
     Interpreter.Ti.compute("main = (λ a b . a - b) 3 2".stripMargin) should be("1")
   }
 
+  it should "evaluate lambda expressions with closures" in {
+    Interpreter.Ti.compute(
+      """
+        |f x = (λ y . y * x) 2 ;
+        |main = f 2""".stripMargin) should be("4")
+    Interpreter.Ti.compute(
+      """
+        |f x = let g = (λ y . y * x) in (g 10 - g 5) ;
+        |main = f 2""".stripMargin) should be("10")
+    Interpreter.Ti.compute(
+      """f x = letrec g = \y. cons (x*y) (g y) in g 3 ;
+        |main = head (tail (f 6))""".stripMargin) should be("18")
+  }
+
   it should "evaluate the sieve of Eratosthenes" in {
     Interpreter.Ti.compute(Examples.sieveUsingPrelude) should be("2 3 5 7 11 13 17 19 23 29")
   }

@@ -59,8 +59,8 @@ case object GraphReducer {
         case data if data.isData && state.dump.nonEmpty => state.popDump()
         case data if data.isData => throw new IllegalArgumentException(s"${data.display()} is not a function!")
         case Node.App(a1, _) => state.withStack(a1 :: addr :: tail)
-        case Node.SC(name, arguments, body) =>
-          val env = state.globals ++ arguments.zip(state.applicationArguments(arguments.length, name))
+        case Node.SC(name, arguments, body, closure) =>
+          val env = state.globals ++ closure ++ arguments.zip(state.applicationArguments(arguments.length, name))
           val (newHeap, newAddress) = instantiate(state.heap, env, body)
           state.withHeap(newHeap).updateRedexRoot(arguments.length, Node.Ref(newAddress))
         case Node.Primitive(op) =>
@@ -112,10 +112,10 @@ case object GraphReducer {
           instantiate(accHeap, envWithDefs, defn._2, Some(envWithDefs(defn._1)))._1)
 
         instantiate(finalHeap, envWithDefs, body)
-      case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]))
+      case c: Expr.Constr[Name] => heap.alloc(Node.Constr(c.asInstanceOf[Expr.Constr[Name]]), resultAddress)
       case Expr.Case(expr, alternatives) =>
         val (newHeap, exprAddr) = instantiate(heap, env, expr)
-        newHeap.alloc(Node.Case(exprAddr, alternatives.map(a => Node.Alternative(a, env))))
-      case lambda: Expr.Lambda[Name] => heap.alloc(Node.SC("λ", lambda.variables, lambda.body))
+        newHeap.alloc(Node.Case(exprAddr, alternatives.map(a => Node.Alternative(a, env))), resultAddress)
+      case lambda: Expr.Lambda[Name] => heap.alloc(Node.SC("λ", lambda.variables, lambda.body, env), resultAddress)
     }
 }
